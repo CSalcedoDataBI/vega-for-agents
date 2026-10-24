@@ -21,14 +21,14 @@ Here the source of truth is the published schema of each language.
 
 | Catalogue | Source of truth | Vocabularies |
 |---|---|---|
-| **Vega-Lite v5** | [`vega-lite-v5.schema.json`](exports/vega-lite-v5.schema.json) | marks, encoding channels, transforms, scale types, every property |
-| **Vega v5** | [`vega-v5.schema.json`](exports/vega-v5.schema.json) | marks, transforms, scale types, every property |
+| **Vega-Lite v5** | [`vega-lite-v5.schema.json`](exports/vega-lite-v5.schema.json) | marks, encoding channels, transforms, scale types, projection types, every property |
+| **Vega v5** | [`vega-v5.schema.json`](exports/vega-v5.schema.json) | marks, transforms, scale types, every property (projection `type` is a free signal, so it is not enumerated) |
 
 `scripts/extract_catalog.py` reads each schema and writes the catalogue of valid names
 (`exports/*.catalog.json`). `scripts/check_repo.py` — the required `Validate` check — fails if
-anything an agent reads (a card, or an example spec) uses a mark, channel, transform, scale type or
-structural property that is **not in the schema**. That is "no invented name", applied to
-Vega and Vega-Lite.
+anything an agent reads (a card, or an example spec) uses a mark, channel, transform, scale type,
+projection type or structural property that is **not in the schema**. That is "no invented name",
+applied to Vega and Vega-Lite.
 
 ## What it will contain
 

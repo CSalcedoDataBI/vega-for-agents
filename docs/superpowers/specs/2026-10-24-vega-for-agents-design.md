@@ -18,9 +18,17 @@ Schema publicado** de cada lenguaje.
 | Vega v5 | `exports/vega-v5.schema.json` (schema oficial, draft-07, 131 definiciones) |
 
 `scripts/extract_catalog.py` lee cada schema y escribe `exports/<lenguaje>.catalog.json` con el
-catálogo de nombres válidos: marks, canales de encoding (VL), transforms, tipos de escala y el
-conjunto de todas las propiedades. La versión exacta del schema se fija por **SHA-256** en el
-`meta` del catálogo; no se vuelve a bajar salvo para fijar una versión nueva.
+catálogo de nombres válidos: marks, canales de encoding (VL), transforms, tipos de escala, tipos de
+proyección (VL) y el conjunto de todas las propiedades. La versión exacta del schema se fija por
+**SHA-256** en el `meta` del catálogo; no se vuelve a bajar salvo para fijar una versión nueva.
+
+Un aviso importante que surgió en la revisión del nacimiento: los marks de Vega-Lite salen solo del
+enum `Mark` (más los tres composite marks `boxplot`/`errorbar`/`errorband`), **no** del enum
+`MarkType`. `MarkType` es el conjunto de marks del scenegraph de Vega (`symbol`, `path`, `group`,
+`shape`), que se usa en filtros de selección/eventos y que el compilador de Vega-Lite **rechaza**
+como valor de `"mark"`. Vega sí usa `MarkType` como su lista de marks (son los marks primitivos del
+scenegraph). Confundirlos rompería la promesa del repo, así que cada lenguaje toma su lista de la
+fuente correcta.
 
 Nota de provenance honesta: el schema de **Vega** deja `marktype` como `string` libre (no lo
 enumera). Los marks primitivos de Vega son el mismo conjunto que el enum `MarkType` de Vega-Lite

@@ -22,11 +22,15 @@ class TestExtract(unittest.TestCase):
         self.assertIn("bar", vl["marks"])
         self.assertIn("boxplot", vl["marks"])          # composite mark
         self.assertNotIn("bubble", vl["marks"])         # invented
+        # MarkType leak: Vega scenegraph marks are NOT valid Vega-Lite `"mark"` values.
+        for scenegraph_only in ("symbol", "path", "group", "shape"):
+            self.assertNotIn(scenegraph_only, vl["marks"])
         self.assertIn("x", vl["channels"])
         self.assertIn("theta", vl["channels"])
         self.assertIn("filter", vl["transforms"])
         self.assertIn("pivot", vl["transforms"])
         self.assertIn("log", vl["scaleTypes"])
+        self.assertIn("mercator", vl["projectionTypes"])
         self.assertIn("field", vl["properties"])
 
     def test_vega_vocabularies(self):

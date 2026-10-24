@@ -47,6 +47,7 @@ def load_catalogs(root: Path = ROOT):
                 "channels": set(data.get("channels", [])),
                 "transforms": set(data.get("transforms", [])),
                 "scaleTypes": set(data.get("scaleTypes", [])),
+                "projectionTypes": set(data.get("projectionTypes", [])),
                 # Channels are properties too; union so an encoding key is never a false positive.
                 "props": set(data.get("properties", [])) | set(data.get("channels", []))
                 | ALWAYS_OK_KEYS,
@@ -145,6 +146,11 @@ def validate_spec(spec, lang: str, cat: dict, where: str) -> list[str]:
             if isinstance(sc, dict) and isinstance(sc.get("type"), str):
                 if sc["type"] not in cat["scaleTypes"]:
                     errors.append(f"{where}: scale type '{sc['type']}' is not in the {lang} schema")
+            # projection type (Vega-Lite enumerates these; Vega leaves it a free string)
+            pr = node.get("projection")
+            if cat["projectionTypes"] and isinstance(pr, dict) and isinstance(pr.get("type"), str):
+                if pr["type"] not in cat["projectionTypes"]:
+                    errors.append(f"{where}: projection type '{pr['type']}' is not in the {lang} schema")
 
             # property-key check (skip user-data subtrees and free-key containers)
             free_keys = parent_key in FREE_KEY_PARENTS
@@ -201,7 +207,8 @@ def check_names(root: Path = ROOT) -> list[str]:
                 continue
             cat = cats[lang]
             name = note.get("name", "")
-            vocab = cat["marks"] | cat["channels"] | cat["transforms"] | cat["scaleTypes"] | cat["props"]
+            vocab = (cat["marks"] | cat["channels"] | cat["transforms"] | cat["scaleTypes"]
+                     | cat["projectionTypes"] | cat["props"])
             if name and name not in vocab:
                 errors.append(f"{rel}: name '{name}' is not in the {lang} schema")
             example = note.get("example")

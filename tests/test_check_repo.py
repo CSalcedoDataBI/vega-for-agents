@@ -75,6 +75,19 @@ class TestNameCheck(unittest.TestCase):
     def test_invented_property(self):
         self.assertTrue(any("property 'wobble'" in e for e in self.v({"wobble": 1}, "vega-lite")))
 
+    def test_valid_projection(self):
+        spec = {"mark": "geoshape", "projection": {"type": "mercator"}}
+        self.assertEqual(self.v(spec, "vega-lite"), [])
+
+    def test_invented_projection(self):
+        errs = self.v({"mark": "geoshape", "projection": {"type": "flatearth"}}, "vega-lite")
+        self.assertTrue(any("projection type 'flatearth'" in e for e in errs))
+
+    def test_scenegraph_mark_rejected_in_vega_lite(self):
+        # `symbol` is a valid Vega mark but not a valid Vega-Lite `"mark"` value.
+        self.assertTrue(any("mark 'symbol'" in e for e in self.v({"mark": "symbol"}, "vega-lite")))
+        self.assertEqual(self.v({"marks": [{"type": "symbol"}]}, "vega"), [])
+
     def test_invented_vega_mark_and_transform(self):
         errs = self.v({"marks": [{"type": "blob"}], "transform": [{"type": "frobnicate"}]}, "vega")
         self.assertTrue(any("mark 'blob'" in e for e in errs))

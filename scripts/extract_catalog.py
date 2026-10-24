@@ -63,9 +63,10 @@ def all_property_names(schema: dict) -> set[str]:
 
 def extract_vega_lite(schema: dict) -> dict:
     defs = schema["definitions"]
-    # Marks: the composite list used in specs, plus the three composite marks, plus the Vega
-    # primitive mark types the schema also enumerates.
-    marks = set(defs["Mark"]["enum"]) | set(defs["MarkType"]["enum"])
+    # Marks: the values allowed for `"mark"` are the `Mark` enum plus the three composite marks.
+    # NOT MarkType: that enum is the Vega scenegraph mark set (symbol, path, group, shape, used in
+    # selection/event filters), which the Vega-Lite compiler rejects as a `"mark"` value.
+    marks = set(defs["Mark"]["enum"])
     for name in ("BoxPlot", "ErrorBar", "ErrorBand"):
         const = defs.get(name, {}).get("const")
         if const:
@@ -80,11 +81,13 @@ def extract_vega_lite(schema: dict) -> dict:
         if required:
             transforms.add(required[0])
     scale_types = set(defs["ScaleType"]["enum"])
+    projection_types = set(defs["ProjectionType"]["enum"])
     return {
         "marks": sorted(marks),
         "channels": sorted(channels),
         "transforms": sorted(transforms),
         "scaleTypes": sorted(scale_types),
+        "projectionTypes": sorted(projection_types),
         "properties": sorted(all_property_names(schema)),
     }
 
@@ -152,6 +155,8 @@ def build_catalog(language: str, vega_lite_marktypes: list[str] | None = None) -
             "the Vega-Lite MarkType enum, the same primitive mark set of the official Vega project.",
             "Signals are user-named and have no closed vocabulary, so they are not catalogued; "
             "signal-related property names are in `properties`.",
+            "Projection `type` in Vega is a stringOrSignal (free), so there is no projectionTypes "
+            "vocabulary here; Vega-Lite does enumerate ProjectionType.",
         ]
     return {"meta": meta, **body}
 
