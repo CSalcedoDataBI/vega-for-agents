@@ -14,14 +14,14 @@
   validado contra el schema. Es para quien escribe specs de Vega/Vega-Lite con un agente.
 - **Papel** (`repo-roles`): tool (plugin de skills)
 - **Gemelo público/privado:** la capa de autoría y *craft* de Deneb para Power BI (`pbiFormat`,
-  plantillas, cross-filter) vive aparte, en el gemelo privado `vega-for-agents-pro`. Hermanos de
-  familia: `spark-for-agents`, `dax-for-agents`, `powerquery-m-for-agents`.
+  plantillas, cross-filter) vive aparte, en una capa privada. Hermanos de familia públicos:
+  `spark-for-agents`, `dax-for-agents`, `powerquery-m-for-agents`.
 
 ## Norte
 
 - **Plan vigente:** [épica v0.1 — catálogos desde los JSON Schemas](https://github.com/CSalcedoDataBI/vega-for-agents/issues/2)
 - **Lo que esta herramienta NO es:**
-  - No es la capa de autoría de Deneb/Power BI: eso es el gemelo privado `vega-for-agents-pro`.
+  - No es la capa de autoría de Deneb/Power BI: eso vive en una capa privada aparte.
   - No es un tutorial de Vega/Vega-Lite: es una referencia que un agente consulta.
   - No ejecuta ni renderiza specs: eso es el motor de Vega y, en Power BI, Vega Studio.
 

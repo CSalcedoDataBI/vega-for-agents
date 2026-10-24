@@ -22,5 +22,4 @@ It is maintained under the maintainer's internal rules: its north is [FICHA.md](
   runner would execute fork PRs on the maintainer's machine.
 - **Vega-Lite vs Vega are two different languages.** A name valid in one is not automatically valid
   in the other; each has its own catalogue. Keep examples labelled by language.
-- The repository is in English. Specs and ADRs under `docs/` are in Spanish, as in the sibling
-  repos.
+- The repository is in English.
