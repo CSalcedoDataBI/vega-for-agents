@@ -54,4 +54,4 @@ Lo que no se toca sin un paso del plan que lo nombre:
 
 ## Aprobación
 
-Aprobada: 2026-10-24
+Aprobada: 2026-10-24 (mantenedor)
