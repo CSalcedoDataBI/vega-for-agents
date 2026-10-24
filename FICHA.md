@@ -1,6 +1,6 @@
 # Ficha — vega-for-agents
 
-> Ficha NORTE de esta herramienta. La lee su experto (`.claude/agents/experto.md`) en cada PR.
+> Ficha de esta herramienta. La lee su experto (`.claude/agents/experto.md`) en cada PR.
 > Se mantiene con las reglas internas del mantenedor: su norte es `FICHA.md` y el agente `experto`
 > fusiona contra ella.
 > Cambiarla exige una nueva aprobación de Cristóbal.
@@ -54,4 +54,4 @@ Lo que no se toca sin un paso del plan que lo nombre:
 
 ## Aprobación
 
-Aprobada: 2026-10-24 (docker-lab)
+Aprobada: 2026-10-24
