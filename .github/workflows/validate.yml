@@ -26,7 +26,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: Catalogues are in sync with the schemas
+      - name: Vendored Vega sources match their pins and upstream
+        run: python scripts/vega_sources.py --upstream
+      - name: Catalogues and cards are in sync with their sources
         run: |
           python scripts/extract_catalog.py --check
       - name: Repo checks (skills frontmatter, workflow cost rules, names from the schema)

@@ -1,0 +1,5391 @@
+{
+  "meta": {
+    "language": "vega",
+    "vocabulary": "expression functions",
+    "vegaVersion": "6.4.0",
+    "source": "https://github.com/vega/vega/tree/adf0ae7cd5dbc5bd0d7b4fb5566a68adf14cac3f",
+    "commit": "adf0ae7cd5dbc5bd0d7b4fb5566a68adf14cac3f",
+    "packages": {
+      "vega-functions": "6.2.0",
+      "vega-expression": "6.2.2",
+      "vega-event-selector": "4.0.0"
+    },
+    "vendoredAt": "sources/vega-6.4.0",
+    "license": "BSD-3-Clause (sources/vega-6.4.0/LICENSE)",
+    "files": {
+      "docs/docs/expressions.md": "c3e9249bd97fef08878e070e857b92657b4be17098d5fbd35738443eebc9328e",
+      "packages/vega-expression/src/functions.js": "5320819cc538419cda27cf682b047309445c6a71977236cd0d8e97bdf08f5f9f",
+      "packages/vega-expression/src/constants.js": "9b2163fda62bd48c4e11585d05da6935e00e5a90c7b1058a366b99b89f954b6b",
+      "packages/vega-functions/src/codegen.js": "dbe4eed91e2c98d02fece34147f9fb8623fc0ec4708085335b2a4c9ee9b7c3c6",
+      "packages/vega-functions/src/functions/ease.js": "b8a0231b6f0b9fbc9d90732c8fafa0d731766debbca68673842257f86647a2a3",
+      "packages/vega-functions/src/scales.js": "780396938cac43f455ab438eb3e73e0150babbda87f14a13a498680ce67d8cf2"
+    },
+    "generatedBy": "scripts/extract_catalog.py",
+    "notes": [
+      "`functions` is every name the Vega expression code generator accepts as a call. `documented: false` marks names the code registers but the doc page does not list (internal helpers and Vega-Lite selection plumbing): legal, but undocumented.",
+      "`categories` and `signatures` are the sections and signature lines of the doc page; a function the doc lists twice (array and string `indexof`, for example) has both.",
+      "Vega-Lite expressions (`calculate`, `filter`, `expr`, `test`) compile to Vega expressions, so they use this same function set."
+    ]
+  },
+  "boundVariables": [
+    "datum",
+    "event",
+    "item"
+  ],
+  "docBoundVariables": [
+    "datum",
+    "event"
+  ],
+  "constants": [
+    {
+      "name": "E",
+      "value": "Math.E"
+    },
+    {
+      "name": "LN10",
+      "value": "Math.LN10"
+    },
+    {
+      "name": "LN2",
+      "value": "Math.LN2"
+    },
+    {
+      "name": "LOG10E",
+      "value": "Math.LOG10E"
+    },
+    {
+      "name": "LOG2E",
+      "value": "Math.LOG2E"
+    },
+    {
+      "name": "MAX_VALUE",
+      "value": "Number.MAX_VALUE"
+    },
+    {
+      "name": "MIN_VALUE",
+      "value": "Number.MIN_VALUE"
+    },
+    {
+      "name": "NaN",
+      "value": "NaN"
+    },
+    {
+      "name": "PI",
+      "value": "Math.PI"
+    },
+    {
+      "name": "SQRT1_2",
+      "value": "Math.SQRT1_2"
+    },
+    {
+      "name": "SQRT2",
+      "value": "Math.SQRT2"
+    }
+  ],
+  "categories": [
+    {
+      "id": "type-checking-functions",
+      "title": "Type Checking Functions",
+      "intro": "Predicate functions for checking value types.",
+      "functions": [
+        "isArray",
+        "isBoolean",
+        "isDate",
+        "isDefined",
+        "isNumber",
+        "isObject",
+        "isRegExp",
+        "isString",
+        "isValid"
+      ]
+    },
+    {
+      "id": "type-coercion-functions",
+      "title": "Type Coercion Functions",
+      "intro": "Functions for coercing values to a desired type.",
+      "functions": [
+        "toBoolean",
+        "toDate",
+        "toNumber",
+        "toString"
+      ]
+    },
+    {
+      "id": "control-flow-functions",
+      "title": "Control Flow Functions",
+      "intro": "",
+      "functions": [
+        "if"
+      ]
+    },
+    {
+      "id": "math-functions",
+      "title": "Math Functions",
+      "intro": "Basic mathematical functions.",
+      "functions": [
+        "isNaN",
+        "isFinite",
+        "abs",
+        "acos",
+        "asin",
+        "atan",
+        "atan2",
+        "ceil",
+        "clamp",
+        "cos",
+        "exp",
+        "floor",
+        "hypot",
+        "log",
+        "max",
+        "min",
+        "pow",
+        "random",
+        "round",
+        "sin",
+        "sqrt",
+        "tan"
+      ]
+    },
+    {
+      "id": "easing-functions",
+      "title": "Easing Functions",
+      "intro": "Easing functions shape the rate of change of an animation over time. Each takes a normalized time _t_ in the interval [0, 1] and returns an eased position, with `f(0) === 0` and `f(1) === 1`. These are the [d3-ease](https://github.com/d3/d3-ease) implementations, exposed under their d3 names.\n\nMost families return a position within [0, 1], but the `easeBack` and `easeElastic` families deliberately overshoot it. If a downstream calculation requires a value within the unit interval, clamp the result, for example `clamp(easeElastic(t), 0, 1)`.\n\nEvery family below is available in three variants: `In` (slow start), `Out` (slow finish), and `InOut` (slow start and finish). The bare name is an alias for the `InOut` variant, except for `easeLinear`, which has no variants.",
+      "functions": [
+        "easeLinear",
+        "easeQuad",
+        "easeQuadIn",
+        "easeQuadOut",
+        "easeQuadInOut",
+        "easeCubic",
+        "easeCubicIn",
+        "easeCubicOut",
+        "easeCubicInOut",
+        "easePoly",
+        "easePolyIn",
+        "easePolyOut",
+        "easePolyInOut",
+        "easeSin",
+        "easeSinIn",
+        "easeSinOut",
+        "easeSinInOut",
+        "easeExp",
+        "easeExpIn",
+        "easeExpOut",
+        "easeExpInOut",
+        "easeCircle",
+        "easeCircleIn",
+        "easeCircleOut",
+        "easeCircleInOut",
+        "easeBounce",
+        "easeBounceIn",
+        "easeBounceOut",
+        "easeBounceInOut",
+        "easeBack",
+        "easeBackIn",
+        "easeBackOut",
+        "easeBackInOut",
+        "easeElastic",
+        "easeElasticIn",
+        "easeElasticOut",
+        "easeElasticInOut"
+      ]
+    },
+    {
+      "id": "statistical-functions",
+      "title": "Statistical Functions",
+      "intro": "Methods for sampling and calculating values for probability distributions.",
+      "functions": [
+        "sampleNormal",
+        "cumulativeNormal",
+        "densityNormal",
+        "quantileNormal",
+        "sampleLogNormal",
+        "cumulativeLogNormal",
+        "densityLogNormal",
+        "quantileLogNormal",
+        "sampleUniform",
+        "cumulativeUniform",
+        "densityUniform",
+        "quantileUniform"
+      ]
+    },
+    {
+      "id": "datetime-functions",
+      "title": "Date-Time Functions",
+      "intro": "Functions for working with date-time values.",
+      "functions": [
+        "now",
+        "datetime",
+        "date",
+        "day",
+        "dayofyear",
+        "year",
+        "quarter",
+        "month",
+        "week",
+        "isoweek",
+        "hours",
+        "minutes",
+        "seconds",
+        "milliseconds",
+        "time",
+        "timezoneoffset",
+        "timeOffset",
+        "timeSequence",
+        "utc",
+        "utcdate",
+        "utcday",
+        "utcdayofyear",
+        "utcyear",
+        "utcquarter",
+        "utcmonth",
+        "utcweek",
+        "utcisoweek",
+        "utchours",
+        "utcminutes",
+        "utcseconds",
+        "utcmilliseconds",
+        "utcOffset",
+        "utcSequence"
+      ]
+    },
+    {
+      "id": "array-functions",
+      "title": "Array Functions",
+      "intro": "Functions for working with arrays of values.",
+      "functions": [
+        "extent",
+        "clampRange",
+        "indexof",
+        "inrange",
+        "join",
+        "lastindexof",
+        "length",
+        "lerp",
+        "interpolateLinear",
+        "peek",
+        "pluck",
+        "reverse",
+        "sequence",
+        "slice",
+        "sort",
+        "span"
+      ]
+    },
+    {
+      "id": "string-functions",
+      "title": "String Functions",
+      "intro": "Functions for modifying text strings.",
+      "functions": [
+        "indexof",
+        "lastindexof",
+        "length",
+        "lower",
+        "pad",
+        "parseFloat",
+        "parseInt",
+        "replace",
+        "slice",
+        "split",
+        "substring",
+        "trim",
+        "truncate",
+        "upper",
+        "btoa",
+        "atob",
+        "encodeURIComponent"
+      ]
+    },
+    {
+      "id": "object-functions",
+      "title": "Object Functions",
+      "intro": "Functions for manipulating object instances.",
+      "functions": [
+        "merge"
+      ]
+    },
+    {
+      "id": "format-functions",
+      "title": "Formatting Functions",
+      "intro": "Functions for formatting number and datetime values as strings.",
+      "functions": [
+        "dayFormat",
+        "dayAbbrevFormat",
+        "format",
+        "monthFormat",
+        "monthAbbrevFormat",
+        "timeUnitSpecifier",
+        "timeFormat",
+        "timeParse",
+        "utcFormat",
+        "utcParse"
+      ]
+    },
+    {
+      "id": "regexp-functions",
+      "title": "RegExp Functions",
+      "intro": "Functions for creating and applying regular expressions.",
+      "functions": [
+        "regexp",
+        "test"
+      ]
+    },
+    {
+      "id": "color-functions",
+      "title": "Color Functions",
+      "intro": "Functions for representing colors in various color spaces. Color functions return objects that, when coerced to a string, map to valid CSS RGB colors.",
+      "functions": [
+        "rgb",
+        "hsl",
+        "lab",
+        "hcl",
+        "luminance",
+        "contrast"
+      ]
+    },
+    {
+      "id": "event-functions",
+      "title": "Event Functions",
+      "intro": "Functions for processing input event data. These functions are only legal in expressions evaluated in response to an event (for example a signal event handler). Invoking these functions elsewhere can result in errors.",
+      "functions": [
+        "item",
+        "group",
+        "xy",
+        "x",
+        "y",
+        "pinchDistance",
+        "pinchAngle",
+        "inScope"
+      ]
+    },
+    {
+      "id": "data-functions",
+      "title": "Data Functions",
+      "intro": "Functions for accessing Vega data sets.",
+      "functions": [
+        "data",
+        "indata"
+      ]
+    },
+    {
+      "id": "scale-functions",
+      "title": "Scale and Projection Functions",
+      "intro": "Functions for working with Vega scale transforms and cartographic projections.",
+      "functions": [
+        "scale",
+        "invert",
+        "copy",
+        "domain",
+        "range",
+        "bandwidth",
+        "bandspace",
+        "gradient",
+        "panLinear",
+        "panLog",
+        "panPow",
+        "panSymlog",
+        "zoomLinear",
+        "zoomLog",
+        "zoomPow",
+        "zoomSymlog"
+      ]
+    },
+    {
+      "id": "geo-functions",
+      "title": "Geographic Functions",
+      "intro": "Functions for analyzing geographic regions represented as GeoJSON features.",
+      "functions": [
+        "geoArea",
+        "geoBounds",
+        "geoCentroid",
+        "geoScale",
+        "geoTranslate"
+      ]
+    },
+    {
+      "id": "tree-functions",
+      "title": "Tree (Hierarchy) Functions",
+      "intro": "Functions for processing hierarchy data sets constructed with the [stratify](https://vega.github.io/vega/docs/transforms/stratify) or [nest](https://vega.github.io/vega/docs/transforms/nest) transforms.",
+      "functions": [
+        "treePath",
+        "treeAncestors"
+      ]
+    },
+    {
+      "id": "browser-functions",
+      "title": "Browser Functions",
+      "intro": "Functions for accessing web browser facilities.",
+      "functions": [
+        "containerSize",
+        "screen",
+        "windowSize"
+      ]
+    },
+    {
+      "id": "logging-functions",
+      "title": "Logging Functions",
+      "intro": "Logging functions for writing messages to the console. These can be helpful when debugging expressions.",
+      "functions": [
+        "warn",
+        "info",
+        "debug"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "_bandwidth",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "internal",
+      "definedIn": "packages/vega-functions/src/scales.js",
+      "docs": []
+    },
+    {
+      "name": "_range",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "internal",
+      "definedIn": "packages/vega-functions/src/scales.js",
+      "docs": []
+    },
+    {
+      "name": "_scale",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "internal",
+      "definedIn": "packages/vega-functions/src/scales.js",
+      "docs": []
+    },
+    {
+      "name": "abs",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "abs(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "abs",
+          "signatures": [
+            "abs(value)"
+          ],
+          "description": "Returns the absolute value of _value_. Same as JavaScript's [`Math.abs`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/abs)."
+        }
+      ]
+    },
+    {
+      "name": "acos",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "acos(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "acos",
+          "signatures": [
+            "acos(value)"
+          ],
+          "description": "Trigonometric arccosine. Same as JavaScript's [`Math.acos`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/acos)."
+        }
+      ]
+    },
+    {
+      "name": "asin",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "asin(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "asin",
+          "signatures": [
+            "asin(value)"
+          ],
+          "description": "Trigonometric arcsine. Same as JavaScript's [`Math.asin`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/asin)."
+        }
+      ]
+    },
+    {
+      "name": "atan",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "atan(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "atan",
+          "signatures": [
+            "atan(value)"
+          ],
+          "description": "Trigonometric arctangent. Same as JavaScript's [`Math.atan`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atan)."
+        }
+      ]
+    },
+    {
+      "name": "atan2",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "atan2(dy, dx)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "atan2",
+          "signatures": [
+            "atan2(dy, dx)"
+          ],
+          "description": "Returns the arctangent of _dy / dx_. Same as JavaScript's [`Math.atan2`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atan2)."
+        }
+      ]
+    },
+    {
+      "name": "atob",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "atob(string)"
+      ],
+      "since": "5.32.0",
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "atob",
+          "signatures": [
+            "atob(string)"
+          ],
+          "description": "Decodes an [ASCII](https://developer.mozilla.org/en-US/docs/Glossary/ASCII) string that was encoded with [Base64](https://developer.mozilla.org/en-US/docs/Glossary/Base64). Same as JavaScript's [Window.atob()](https://developer.mozilla.org/en-US/docs/Web/API/Window/atob)."
+        }
+      ]
+    },
+    {
+      "name": "bandspace",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "bandspace(count[, paddingInner, paddingOuter])"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "bandspace",
+          "signatures": [
+            "bandspace(count[, paddingInner, paddingOuter])"
+          ],
+          "description": "Returns the number of steps needed within a band scale, based on the _count_ of domain elements and the inner and outer padding values. While normally calculated within the scale itself, this function can be helpful for determining the size of a chart's layout."
+        }
+      ]
+    },
+    {
+      "name": "bandwidth",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "bandwidth(name[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "bandwidth",
+          "signatures": [
+            "bandwidth(name[, group])"
+          ],
+          "description": "Returns the current band width for the named band scale transform, or zero if the scale is not found or is not a band scale. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale."
+        }
+      ]
+    },
+    {
+      "name": "btoa",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "btoa(string)"
+      ],
+      "since": "5.32.0",
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "btoa",
+          "signatures": [
+            "btoa(string)"
+          ],
+          "description": "Creates a [Base64](https://developer.mozilla.org/en-US/docs/Glossary/Base64)-encoded [ASCII](https://developer.mozilla.org/en-US/docs/Glossary/ASCII) string. Same as JavaScript's [Window.btoa()](https://developer.mozilla.org/en-US/docs/Web/API/Window/btoa)."
+        }
+      ]
+    },
+    {
+      "name": "ceil",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "ceil(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "ceil",
+          "signatures": [
+            "ceil(value)"
+          ],
+          "description": "Rounds _value_ to the nearest integer of equal or greater value. Same as JavaScript's [`Math.ceil`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/ceil)."
+        }
+      ]
+    },
+    {
+      "name": "clamp",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "clamp(value, min, max)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "clamp",
+          "signatures": [
+            "clamp(value, min, max)"
+          ],
+          "description": "Restricts _value_ to be between the specified _min_ and _max_."
+        }
+      ]
+    },
+    {
+      "name": "clampRange",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "clampRange(range, min, max)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "clamprange",
+          "signatures": [
+            "clampRange(range, min, max)"
+          ],
+          "description": "Clamps a two-element _range_ array in a span-preserving manner. If the span of the input _range_ is less than _(max - min)_ and an endpoint exceeds either the _min_ or _max_ value, the range is translated such that the span is preserved and one endpoint touches the boundary of the _[min, max]_ range. If the span exceeds _(max - min)_, the range _[min, max]_ is returned."
+        }
+      ]
+    },
+    {
+      "name": "containerSize",
+      "documented": true,
+      "categories": [
+        "browser-functions"
+      ],
+      "signatures": [
+        "containerSize()"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "browser-functions",
+          "anchor": "containerSize",
+          "signatures": [
+            "containerSize()"
+          ],
+          "description": "Returns the current CSS box size (`[el.clientWidth, el.clientHeight]`) of the parent DOM element that contains the Vega view. If there is no container element, returns `[undefined, undefined]`. To keep a view sized to its container, update a size signal on the [`container:resize`](https://vega.github.io/vega/docs/event-streams/#types) event stream. (since Vega 6.4)"
+        }
+      ]
+    },
+    {
+      "name": "contrast",
+      "documented": true,
+      "categories": [
+        "color-functions"
+      ],
+      "signatures": [
+        "contrast(specifier1, specifier2)"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "color-functions",
+          "anchor": "contrast",
+          "signatures": [
+            "contrast(specifier1, specifier2)"
+          ],
+          "description": "Returns the contrast ratio between the input color specifiers as a float between 1 and 21. The contrast is calculated according to the [W3C Web Content Accessibility Guidelines](https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef)."
+        }
+      ]
+    },
+    {
+      "name": "copy",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "copy(name[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "copy",
+          "signatures": [
+            "copy(name[, group])"
+          ],
+          "description": "Returns a copy (a new cloned instance) of the named scale transform of projection, or `undefined` if no scale or projection is found. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale or projection."
+        }
+      ]
+    },
+    {
+      "name": "cos",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "cos(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "cos",
+          "signatures": [
+            "cos(value)"
+          ],
+          "description": "Trigonometric cosine. Same as JavaScript's [`Math.cos`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/cos)."
+        }
+      ]
+    },
+    {
+      "name": "cumulativeLogNormal",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "cumulativeLogNormal(value[, mean, stdev])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "cumulativeLogNormal",
+          "signatures": [
+            "cumulativeLogNormal(value[, mean, stdev])"
+          ],
+          "description": "Returns the value of the [cumulative distribution function](https://en.wikipedia.org/wiki/Cumulative_distribution_function) at the given input domain _value_ for a log-normal distribution with specified log _mean_ and log standard deviation _stdev_. If unspecified, the log mean defaults to `0` and the log standard deviation defaults to `1`."
+        }
+      ]
+    },
+    {
+      "name": "cumulativeNormal",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "cumulativeNormal(value[, mean, stdev])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "cumulativeNormal",
+          "signatures": [
+            "cumulativeNormal(value[, mean, stdev])"
+          ],
+          "description": "Returns the value of the [cumulative distribution function](https://en.wikipedia.org/wiki/Cumulative_distribution_function) at the given input domain _value_ for a normal distribution with specified _mean_ and standard deviation _stdev_. If unspecified, the mean defaults to `0` and the standard deviation defaults to `1`."
+        }
+      ]
+    },
+    {
+      "name": "cumulativeUniform",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "cumulativeUniform(value[, min, max])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "cumulativeUniform",
+          "signatures": [
+            "cumulativeUniform(value[, min, max])"
+          ],
+          "description": "Returns the value of the [cumulative distribution function](https://en.wikipedia.org/wiki/Cumulative_distribution_function) at the given input domain _value_ for a uniform distribution over the interval [_min_, _max_). If unspecified, _min_ defaults to `0` and _max_ defaults to `1`. If only one argument is provided, it is interpreted as the _max_ value."
+        }
+      ]
+    },
+    {
+      "name": "data",
+      "documented": true,
+      "categories": [
+        "data-functions"
+      ],
+      "signatures": [
+        "data(name)"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "data-functions",
+          "anchor": "data",
+          "signatures": [
+            "data(name)"
+          ],
+          "description": "Returns the array of data objects for the Vega data set with the given _name_. If the data set is not found, returns an empty array."
+        }
+      ]
+    },
+    {
+      "name": "date",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "date(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "date",
+          "signatures": [
+            "date(datetime)"
+          ],
+          "description": "Returns the day of the month for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "datetime",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "datetime(year, month[, day, hour, min, sec, millisec])"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "datetime",
+          "signatures": [
+            "datetime(year, month[, day, hour, min, sec, millisec])"
+          ],
+          "description": "Returns a new `Date` instance. The _month_ is 0-based, such that `1` represents February."
+        }
+      ]
+    },
+    {
+      "name": "day",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "day(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "day",
+          "signatures": [
+            "day(datetime)"
+          ],
+          "description": "Returns the day of the week for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "dayAbbrevFormat",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "dayAbbrevFormat(day)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "dayAbbrevFormat",
+          "signatures": [
+            "dayAbbrevFormat(day)"
+          ],
+          "description": "Formats a (0-6) _weekday_ number as an abbreviated week day name, according to the current locale. For example: `dayAbbrevFormat(0) -> \"Sun\"`."
+        }
+      ]
+    },
+    {
+      "name": "dayFormat",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "dayFormat(day)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "dayFormat",
+          "signatures": [
+            "dayFormat(day)"
+          ],
+          "description": "Formats a (0-6) _weekday_ number as a full week day name, according to the current locale. For example: `dayFormat(0) -> \"Sunday\"`."
+        }
+      ]
+    },
+    {
+      "name": "dayofyear",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "dayofyear(datetime)"
+      ],
+      "since": "5.11",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "dayofyear",
+          "signatures": [
+            "dayofyear(datetime)"
+          ],
+          "description": "Returns the one-based day of the year for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "debug",
+      "documented": true,
+      "categories": [
+        "logging-functions"
+      ],
+      "signatures": [
+        "debug(value1[, value2, ...])"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "logging-functions",
+          "anchor": "debug",
+          "signatures": [
+            "debug(value1[, value2, ...])"
+          ],
+          "description": "Logs a debugging message and returns the last argument. For the message to appear in the console, the visualization view must have the appropriate logging level set."
+        }
+      ]
+    },
+    {
+      "name": "densityLogNormal",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "densityLogNormal(value[, mean, stdev])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "densityLogNormal",
+          "signatures": [
+            "densityLogNormal(value[, mean, stdev])"
+          ],
+          "description": "Returns the value of the [probability density function](https://en.wikipedia.org/wiki/Probability_density_function) at the given input domain _value_, for a log-normal distribution with specified log _mean_ and log standard deviation _stdev_. If unspecified, the log mean defaults to `0` and the log standard deviation defaults to `1`."
+        }
+      ]
+    },
+    {
+      "name": "densityNormal",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "densityNormal(value[, mean, stdev])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "densityNormal",
+          "signatures": [
+            "densityNormal(value[, mean, stdev])"
+          ],
+          "description": "Returns the value of the [probability density function](https://en.wikipedia.org/wiki/Probability_density_function) at the given input domain _value_, for a normal distribution with specified _mean_ and standard deviation _stdev_. If unspecified, the mean defaults to `0` and the standard deviation defaults to `1`."
+        }
+      ]
+    },
+    {
+      "name": "densityUniform",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "densityUniform(value[, min, max])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "densityUniform",
+          "signatures": [
+            "densityUniform(value[, min, max])"
+          ],
+          "description": "Returns the value of the [probability density function](https://en.wikipedia.org/wiki/Probability_density_function) at the given input domain _value_,  for a uniform distribution over the interval [_min_, _max_). If unspecified, _min_ defaults to `0` and _max_ defaults to `1`. If only one argument is provided, it is interpreted as the _max_ value."
+        }
+      ]
+    },
+    {
+      "name": "domain",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "domain(name[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "domain",
+          "signatures": [
+            "domain(name[, group])"
+          ],
+          "description": "Returns the scale domain array for the named scale transform, or an empty array if the scale is not found. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale."
+        }
+      ]
+    },
+    {
+      "name": "easeBack",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeBack(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeBack",
+          "signatures": [
+            "easeBack(t)"
+          ],
+          "description": "Anticipatory easing, which backs up before advancing toward its target, with d3's default overshoot. Across its variants the returned position spans about [-0.1, 1.1]."
+        }
+      ]
+    },
+    {
+      "name": "easeBackIn",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeBackIn(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeBack",
+          "signatures": [
+            "easeBackIn(t)"
+          ],
+          "description": "Anticipatory easing, which backs up before advancing toward its target, with d3's default overshoot. Across its variants the returned position spans about [-0.1, 1.1]."
+        }
+      ]
+    },
+    {
+      "name": "easeBackInOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeBackInOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeBack",
+          "signatures": [
+            "easeBackInOut(t)"
+          ],
+          "description": "Anticipatory easing, which backs up before advancing toward its target, with d3's default overshoot. Across its variants the returned position spans about [-0.1, 1.1]."
+        }
+      ]
+    },
+    {
+      "name": "easeBackOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeBackOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeBack",
+          "signatures": [
+            "easeBackOut(t)"
+          ],
+          "description": "Anticipatory easing, which backs up before advancing toward its target, with d3's default overshoot. Across its variants the returned position spans about [-0.1, 1.1]."
+        }
+      ]
+    },
+    {
+      "name": "easeBounce",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeBounce(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeBounce",
+          "signatures": [
+            "easeBounce(t)"
+          ],
+          "description": "Bounce easing, as in a ball falling on a hard surface. Note that `easeBounce` aliases `easeBounceOut`, following d3."
+        }
+      ]
+    },
+    {
+      "name": "easeBounceIn",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeBounceIn(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeBounce",
+          "signatures": [
+            "easeBounceIn(t)"
+          ],
+          "description": "Bounce easing, as in a ball falling on a hard surface. Note that `easeBounce` aliases `easeBounceOut`, following d3."
+        }
+      ]
+    },
+    {
+      "name": "easeBounceInOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeBounceInOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeBounce",
+          "signatures": [
+            "easeBounceInOut(t)"
+          ],
+          "description": "Bounce easing, as in a ball falling on a hard surface. Note that `easeBounce` aliases `easeBounceOut`, following d3."
+        }
+      ]
+    },
+    {
+      "name": "easeBounceOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeBounceOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeBounce",
+          "signatures": [
+            "easeBounceOut(t)"
+          ],
+          "description": "Bounce easing, as in a ball falling on a hard surface. Note that `easeBounce` aliases `easeBounceOut`, following d3."
+        }
+      ]
+    },
+    {
+      "name": "easeCircle",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeCircle(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeCircle",
+          "signatures": [
+            "easeCircle(t)"
+          ],
+          "description": "Circular easing."
+        }
+      ]
+    },
+    {
+      "name": "easeCircleIn",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeCircleIn(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeCircle",
+          "signatures": [
+            "easeCircleIn(t)"
+          ],
+          "description": "Circular easing."
+        }
+      ]
+    },
+    {
+      "name": "easeCircleInOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeCircleInOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeCircle",
+          "signatures": [
+            "easeCircleInOut(t)"
+          ],
+          "description": "Circular easing."
+        }
+      ]
+    },
+    {
+      "name": "easeCircleOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeCircleOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeCircle",
+          "signatures": [
+            "easeCircleOut(t)"
+          ],
+          "description": "Circular easing."
+        }
+      ]
+    },
+    {
+      "name": "easeCubic",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeCubic(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeCubic",
+          "signatures": [
+            "easeCubic(t)"
+          ],
+          "description": "Cubic easing (_t_<sup>3</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeCubicIn",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeCubicIn(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeCubic",
+          "signatures": [
+            "easeCubicIn(t)"
+          ],
+          "description": "Cubic easing (_t_<sup>3</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeCubicInOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeCubicInOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeCubic",
+          "signatures": [
+            "easeCubicInOut(t)"
+          ],
+          "description": "Cubic easing (_t_<sup>3</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeCubicOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeCubicOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeCubic",
+          "signatures": [
+            "easeCubicOut(t)"
+          ],
+          "description": "Cubic easing (_t_<sup>3</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeElastic",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeElastic(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeElastic",
+          "signatures": [
+            "easeElastic(t)"
+          ],
+          "description": "Elastic easing, like a rubber band, with d3's default amplitude and period. Across its variants the returned position spans about [-0.373, 1.373]. Note that `easeElastic` aliases `easeElasticOut`, following d3."
+        }
+      ]
+    },
+    {
+      "name": "easeElasticIn",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeElasticIn(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeElastic",
+          "signatures": [
+            "easeElasticIn(t)"
+          ],
+          "description": "Elastic easing, like a rubber band, with d3's default amplitude and period. Across its variants the returned position spans about [-0.373, 1.373]. Note that `easeElastic` aliases `easeElasticOut`, following d3."
+        }
+      ]
+    },
+    {
+      "name": "easeElasticInOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeElasticInOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeElastic",
+          "signatures": [
+            "easeElasticInOut(t)"
+          ],
+          "description": "Elastic easing, like a rubber band, with d3's default amplitude and period. Across its variants the returned position spans about [-0.373, 1.373]. Note that `easeElastic` aliases `easeElasticOut`, following d3."
+        }
+      ]
+    },
+    {
+      "name": "easeElasticOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeElasticOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeElastic",
+          "signatures": [
+            "easeElasticOut(t)"
+          ],
+          "description": "Elastic easing, like a rubber band, with d3's default amplitude and period. Across its variants the returned position spans about [-0.373, 1.373]. Note that `easeElastic` aliases `easeElasticOut`, following d3."
+        }
+      ]
+    },
+    {
+      "name": "easeExp",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeExp(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeExp",
+          "signatures": [
+            "easeExp(t)"
+          ],
+          "description": "Exponential easing (2<sup>_t_</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeExpIn",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeExpIn(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeExp",
+          "signatures": [
+            "easeExpIn(t)"
+          ],
+          "description": "Exponential easing (2<sup>_t_</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeExpInOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeExpInOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeExp",
+          "signatures": [
+            "easeExpInOut(t)"
+          ],
+          "description": "Exponential easing (2<sup>_t_</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeExpOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeExpOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeExp",
+          "signatures": [
+            "easeExpOut(t)"
+          ],
+          "description": "Exponential easing (2<sup>_t_</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeLinear",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeLinear(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeLinear",
+          "signatures": [
+            "easeLinear(t)"
+          ],
+          "description": "The identity function; the animation proceeds at a constant rate."
+        }
+      ]
+    },
+    {
+      "name": "easePoly",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easePoly(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easePoly",
+          "signatures": [
+            "easePoly(t)"
+          ],
+          "description": "Polynomial easing, with d3's default exponent of 3."
+        }
+      ]
+    },
+    {
+      "name": "easePolyIn",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easePolyIn(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easePoly",
+          "signatures": [
+            "easePolyIn(t)"
+          ],
+          "description": "Polynomial easing, with d3's default exponent of 3."
+        }
+      ]
+    },
+    {
+      "name": "easePolyInOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easePolyInOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easePoly",
+          "signatures": [
+            "easePolyInOut(t)"
+          ],
+          "description": "Polynomial easing, with d3's default exponent of 3."
+        }
+      ]
+    },
+    {
+      "name": "easePolyOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easePolyOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easePoly",
+          "signatures": [
+            "easePolyOut(t)"
+          ],
+          "description": "Polynomial easing, with d3's default exponent of 3."
+        }
+      ]
+    },
+    {
+      "name": "easeQuad",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeQuad(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeQuad",
+          "signatures": [
+            "easeQuad(t)"
+          ],
+          "description": "Quadratic easing (_t_<sup>2</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeQuadIn",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeQuadIn(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeQuad",
+          "signatures": [
+            "easeQuadIn(t)"
+          ],
+          "description": "Quadratic easing (_t_<sup>2</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeQuadInOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeQuadInOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeQuad",
+          "signatures": [
+            "easeQuadInOut(t)"
+          ],
+          "description": "Quadratic easing (_t_<sup>2</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeQuadOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeQuadOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeQuad",
+          "signatures": [
+            "easeQuadOut(t)"
+          ],
+          "description": "Quadratic easing (_t_<sup>2</sup>)."
+        }
+      ]
+    },
+    {
+      "name": "easeSin",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeSin(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeSin",
+          "signatures": [
+            "easeSin(t)"
+          ],
+          "description": "Sinusoidal easing."
+        }
+      ]
+    },
+    {
+      "name": "easeSinIn",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeSinIn(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeSin",
+          "signatures": [
+            "easeSinIn(t)"
+          ],
+          "description": "Sinusoidal easing."
+        }
+      ]
+    },
+    {
+      "name": "easeSinInOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeSinInOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeSin",
+          "signatures": [
+            "easeSinInOut(t)"
+          ],
+          "description": "Sinusoidal easing."
+        }
+      ]
+    },
+    {
+      "name": "easeSinOut",
+      "documented": true,
+      "categories": [
+        "easing-functions"
+      ],
+      "signatures": [
+        "easeSinOut(t)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/functions/ease.js",
+      "docs": [
+        {
+          "category": "easing-functions",
+          "anchor": "easeSin",
+          "signatures": [
+            "easeSinOut(t)"
+          ],
+          "description": "Sinusoidal easing."
+        }
+      ]
+    },
+    {
+      "name": "encode",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "encodeURIComponent",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "encodeURIComponent(string)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "encodeURIComponent",
+          "signatures": [
+            "encodeURIComponent(string)"
+          ],
+          "description": "Encodes a URI component by replacing each instance of certain characters with UTF-8 encoding. Same as JavaScript's [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent)."
+        }
+      ]
+    },
+    {
+      "name": "exp",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "exp(exponent)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "exp",
+          "signatures": [
+            "exp(exponent)"
+          ],
+          "description": "Returns the value of _e_ raised to the provided _exponent_. Same as JavaScript's [`Math.exp`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/exp)."
+        }
+      ]
+    },
+    {
+      "name": "extent",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "extent(array)"
+      ],
+      "since": "4.0",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "extent",
+          "signatures": [
+            "extent(array)"
+          ],
+          "description": "Returns a new _[min, max]_ array with the minimum and maximum values of the input array, ignoring `null`, `undefined`, and `NaN` values."
+        }
+      ]
+    },
+    {
+      "name": "floor",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "floor(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "floor",
+          "signatures": [
+            "floor(value)"
+          ],
+          "description": "Rounds _value_ to the nearest integer of equal or lower value. Same as JavaScript's [`Math.floor`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor)."
+        }
+      ]
+    },
+    {
+      "name": "flush",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "format",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "format(value, specifier)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "format",
+          "signatures": [
+            "format(value, specifier)"
+          ],
+          "description": "Formats a numeric _value_ as a string. The _specifier_ must be a valid [d3-format specifier](https://github.com/d3/d3-format/) (e.g., `format(value, ',.2f')`.\nNull values are formatted as `\"null\"`."
+        }
+      ]
+    },
+    {
+      "name": "geoArea",
+      "documented": true,
+      "categories": [
+        "geo-functions"
+      ],
+      "signatures": [
+        "geoArea(projection, feature[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "geo-functions",
+          "anchor": "geoArea",
+          "signatures": [
+            "geoArea(projection, feature[, group])"
+          ],
+          "description": "Returns the projected planar area (typically in square pixels) of a GeoJSON _feature_ according to the named _projection_. If the _projection_ argument is `null`, computes the spherical area in steradians using unprojected longitude, latitude coordinates. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the projection. Uses d3-geo's [geoArea](https://github.com/d3/d3-geo#geoArea) and [path.area](https://github.com/d3/d3-geo#path_area) methods."
+        }
+      ]
+    },
+    {
+      "name": "geoBounds",
+      "documented": true,
+      "categories": [
+        "geo-functions"
+      ],
+      "signatures": [
+        "geoBounds(projection, feature[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "geo-functions",
+          "anchor": "geoBounds",
+          "signatures": [
+            "geoBounds(projection, feature[, group])"
+          ],
+          "description": "Returns the projected planar bounding box (typically in pixels) for the specified GeoJSON _feature_, according to the named _projection_. The bounding box is represented by a two-dimensional array: [[_x₀_, _y₀_], [_x₁_, _y₁_]], where _x₀_ is the minimum x-coordinate, _y₀_ is the minimum y-coordinate, _x₁_ is the maximum x-coordinate, and _y₁_ is the maximum y-coordinate. If the _projection_ argument is `null`, computes the spherical bounding box using unprojected longitude, latitude coordinates. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the projection. Uses d3-geo's [geoBounds](https://github.com/d3/d3-geo#geoBounds) and [path.bounds](https://github.com/d3/d3-geo#path_bounds) methods."
+        }
+      ]
+    },
+    {
+      "name": "geoCentroid",
+      "documented": true,
+      "categories": [
+        "geo-functions"
+      ],
+      "signatures": [
+        "geoCentroid(projection, feature[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "geo-functions",
+          "anchor": "geoCentroid",
+          "signatures": [
+            "geoCentroid(projection, feature[, group])"
+          ],
+          "description": "Returns the projected planar centroid (typically in pixels) for the specified GeoJSON _feature_, according to the named _projection_. If the _projection_ argument is `null`, computes the spherical centroid using unprojected longitude, latitude coordinates. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the projection. Uses d3-geo's [geoCentroid](https://github.com/d3/d3-geo#geoCentroid) and [path.centroid](https://github.com/d3/d3-geo#path_centroid) methods."
+        }
+      ]
+    },
+    {
+      "name": "geoScale",
+      "documented": true,
+      "categories": [
+        "geo-functions"
+      ],
+      "signatures": [
+        "geoScale(projection[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "geo-functions",
+          "anchor": "geoScale",
+          "signatures": [
+            "geoScale(projection[, group])"
+          ],
+          "description": "Returns the scale value for the named _projection_. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the projection."
+        }
+      ]
+    },
+    {
+      "name": "geoShape",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "geoTranslate",
+      "documented": true,
+      "categories": [
+        "geo-functions"
+      ],
+      "signatures": [
+        "geoTranslate(projection[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "geo-functions",
+          "anchor": "geoTranslate",
+          "signatures": [
+            "geoTranslate(projection[, group])"
+          ],
+          "description": "Returns the two-element translation array for the named _projection_. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the projection."
+        }
+      ]
+    },
+    {
+      "name": "gradient",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "gradient(scale, p0, p1[, count])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "gradient",
+          "signatures": [
+            "gradient(scale, p0, p1[, count])"
+          ],
+          "description": "Returns a linear color gradient for the _scale_ (whose range must be a [continuous color scheme](https://vega.github.io/vega/docs/schemes)) and starting and ending points _p0_ and _p1_, each an _[x, y]_ array. The points _p0_ and _p1_ should be expressed in normalized coordinates in the domain [0, 1], relative to the bounds of the item being colored. If unspecified, _p0_ defaults to `[0, 0]` and _p1_ defaults to `[1, 0]`, for a horizontal gradient that spans the full bounds of an item. The optional _count_ argument indicates a desired target number of sample points to take from the color scale."
+        }
+      ]
+    },
+    {
+      "name": "group",
+      "documented": true,
+      "categories": [
+        "event-functions"
+      ],
+      "signatures": [
+        "group([name])"
+      ],
+      "since": null,
+      "kind": "event",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "event-functions",
+          "anchor": "group",
+          "signatures": [
+            "group([name])"
+          ],
+          "description": "Returns the scenegraph group mark item in which the current event has occurred. If no arguments are provided, the immediate parent group is returned. If a group name is provided, the matching ancestor group item is returned."
+        }
+      ]
+    },
+    {
+      "name": "hcl",
+      "documented": true,
+      "categories": [
+        "color-functions"
+      ],
+      "signatures": [
+        "hcl(h, c, l[, opacity])",
+        "hcl(specifier)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "color-functions",
+          "anchor": "hcl",
+          "signatures": [
+            "hcl(h, c, l[, opacity])",
+            "hcl(specifier)"
+          ],
+          "description": "Constructs a new [HCL](https://en.wikipedia.org/wiki/Lab_color_space#CIELAB) (hue, chroma, luminance) color. If _h_, _c_ and _l_ are specified, these represent the channel values of the returned color; an _opacity_ may also be specified. If a CSS Color Module Level 3 _specifier_ string is specified, it is parsed and then converted to the HCL color space. Uses [d3-color's hcl function](https://github.com/d3/d3-color#hcl)."
+        }
+      ]
+    },
+    {
+      "name": "hours",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "hours(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "hours",
+          "signatures": [
+            "hours(datetime)"
+          ],
+          "description": "Returns the hours component for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "hsl",
+      "documented": true,
+      "categories": [
+        "color-functions"
+      ],
+      "signatures": [
+        "hsl(h, s, l[, opacity])",
+        "hsl(specifier)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "color-functions",
+          "anchor": "hsl",
+          "signatures": [
+            "hsl(h, s, l[, opacity])",
+            "hsl(specifier)"
+          ],
+          "description": "Constructs a new [HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) color. If _h_, _s_ and _l_ are specified, these represent the channel values of the returned color; an _opacity_ may also be specified. If a CSS Color Module Level 3 _specifier_ string is specified, it is parsed and then converted to the HSL color space. Uses [d3-color's hsl function](https://github.com/d3/d3-color#hsl)."
+        }
+      ]
+    },
+    {
+      "name": "hypot",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "hypot(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "hypot",
+          "signatures": [
+            "hypot(value)"
+          ],
+          "description": "Returns the square root of the sum of squares of its arguments. Same as JavaScript's [`Math.hypot`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/hypot)."
+        }
+      ]
+    },
+    {
+      "name": "if",
+      "documented": true,
+      "categories": [
+        "control-flow-functions"
+      ],
+      "signatures": [
+        "if(test, thenValue, elseValue)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "control-flow-functions",
+          "anchor": "if",
+          "signatures": [
+            "if(test, thenValue, elseValue)"
+          ],
+          "description": "If _test_ is truthy, returns _thenValue_. Otherwise, returns _elseValue_. The _if_ function is equivalent to the ternary operator `a ? b : c`."
+        }
+      ]
+    },
+    {
+      "name": "indata",
+      "documented": true,
+      "categories": [
+        "data-functions"
+      ],
+      "signatures": [
+        "indata(name, field, value)"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "data-functions",
+          "anchor": "indata",
+          "signatures": [
+            "indata(name, field, value)"
+          ],
+          "description": "Tests if the data set with a given _name_ contains a datum with a _field_ value that matches the input _value_. For example: `indata('table', 'category', value)`."
+        }
+      ]
+    },
+    {
+      "name": "indexof",
+      "documented": true,
+      "categories": [
+        "array-functions",
+        "string-functions"
+      ],
+      "signatures": [
+        "indexof(array, value)",
+        "indexof(string, substring)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "indexof",
+          "signatures": [
+            "indexof(array, value)"
+          ],
+          "description": "Returns the first index of _value_ in the input _array_."
+        },
+        {
+          "category": "string-functions",
+          "anchor": "string_indexof",
+          "signatures": [
+            "indexof(string, substring)"
+          ],
+          "description": "Returns the first index of _substring_ in the input _string_."
+        }
+      ]
+    },
+    {
+      "name": "info",
+      "documented": true,
+      "categories": [
+        "logging-functions"
+      ],
+      "signatures": [
+        "info(value1[, value2, ...])"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "logging-functions",
+          "anchor": "info",
+          "signatures": [
+            "info(value1[, value2, ...])"
+          ],
+          "description": "Logs an informative message and returns the last argument. For the message to appear in the console, the visualization view must have the appropriate logging level set."
+        }
+      ]
+    },
+    {
+      "name": "inrange",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "inrange(value, range)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "inrange",
+          "signatures": [
+            "inrange(value, range)"
+          ],
+          "description": "Tests whether _value_ lies within (or is equal to either) the first and last values of the _range_ array."
+        }
+      ]
+    },
+    {
+      "name": "inScope",
+      "documented": true,
+      "categories": [
+        "event-functions"
+      ],
+      "signatures": [
+        "inScope(item)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "event-functions",
+          "anchor": "inScope",
+          "signatures": [
+            "inScope(item)"
+          ],
+          "description": "Returns true if the given scenegraph _item_ is a descendant of the group mark in which the event handler was defined, false otherwise."
+        }
+      ]
+    },
+    {
+      "name": "interpolateLinear",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "interpolateLinear(array, fraction)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "interpolateLinear",
+          "signatures": [
+            "interpolateLinear(array, fraction)"
+          ],
+          "description": "Returns the piecewise-linearly interpolated value across _all_ entries in the _array_ for the provided interpolation _fraction_ (typically between 0 and 1). The entries are treated as evenly-spaced control points, and interpolation occurs within whichever segment _fraction_ falls into. Unlike [lerp](https://vega.github.io/vega/docs/expressions/#lerp), which considers only the first and last entries, this respects intermediate values: `interpolateLinear([0, 100, 10], 0.5)` returns 100, whereas `lerp([0, 100, 10], 0.5)` returns 5."
+        }
+      ]
+    },
+    {
+      "name": "intersect",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "intersectLasso",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "invert",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "invert(name, value[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "invert",
+          "signatures": [
+            "invert(name, value[, group])"
+          ],
+          "description": "Inverts the named scale transform (or projection) for the specified _value_. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale or projection."
+        }
+      ]
+    },
+    {
+      "name": "isArray",
+      "documented": true,
+      "categories": [
+        "type-checking-functions"
+      ],
+      "signatures": [
+        "isArray(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-checking-functions",
+          "anchor": "isArray",
+          "signatures": [
+            "isArray(value)"
+          ],
+          "description": "Returns true if _value_ is an array, false otherwise."
+        }
+      ]
+    },
+    {
+      "name": "isBoolean",
+      "documented": true,
+      "categories": [
+        "type-checking-functions"
+      ],
+      "signatures": [
+        "isBoolean(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-checking-functions",
+          "anchor": "isBoolean",
+          "signatures": [
+            "isBoolean(value)"
+          ],
+          "description": "Returns true if _value_ is a boolean (`true` or `false`), false otherwise."
+        }
+      ]
+    },
+    {
+      "name": "isDate",
+      "documented": true,
+      "categories": [
+        "type-checking-functions"
+      ],
+      "signatures": [
+        "isDate(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-checking-functions",
+          "anchor": "isDate",
+          "signatures": [
+            "isDate(value)"
+          ],
+          "description": "Returns true if _value_ is a Date object, false otherwise. This method will return false for timestamp numbers or date-formatted strings; it recognizes Date objects only."
+        }
+      ]
+    },
+    {
+      "name": "isDefined",
+      "documented": true,
+      "categories": [
+        "type-checking-functions"
+      ],
+      "signatures": [
+        "isDefined(value)"
+      ],
+      "since": "5.4",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-checking-functions",
+          "anchor": "isDefined",
+          "signatures": [
+            "isDefined(value)"
+          ],
+          "description": "Returns true if _value_ is a defined value, false if _value_ equals `undefined`. This method will return true for `null` and `NaN` values."
+        }
+      ]
+    },
+    {
+      "name": "isFinite",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "isFinite(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "isFinite",
+          "signatures": [
+            "isFinite(value)"
+          ],
+          "description": "Returns true if _value_ is a finite number. Same as JavaScript's [`Number.isFinite`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isFinite)."
+        }
+      ]
+    },
+    {
+      "name": "isNaN",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "isNaN(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "isNaN",
+          "signatures": [
+            "isNaN(value)"
+          ],
+          "description": "Returns true if _value_ is not a number. Same as JavaScript's [`Number.isNaN`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNan)."
+        }
+      ]
+    },
+    {
+      "name": "isNumber",
+      "documented": true,
+      "categories": [
+        "type-checking-functions"
+      ],
+      "signatures": [
+        "isNumber(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-checking-functions",
+          "anchor": "isNumber",
+          "signatures": [
+            "isNumber(value)"
+          ],
+          "description": "Returns true if _value_ is a number, false otherwise. `NaN` and `Infinity` are considered numbers."
+        }
+      ]
+    },
+    {
+      "name": "isObject",
+      "documented": true,
+      "categories": [
+        "type-checking-functions"
+      ],
+      "signatures": [
+        "isObject(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-checking-functions",
+          "anchor": "isObject",
+          "signatures": [
+            "isObject(value)"
+          ],
+          "description": "Returns true if _value_ is an object (including arrays and Dates), false otherwise."
+        }
+      ]
+    },
+    {
+      "name": "isoweek",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "isoweek(date)"
+      ],
+      "since": "6.4",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "isoweek",
+          "signatures": [
+            "isoweek(date)"
+          ],
+          "description": "Returns the [ISO 8601](https://en.wikipedia.org/wiki/ISO_week_date) week number for the given _datetime_, in local time. Weeks start on Monday and week 1 is the week that contains January 4, so the result is between 1 and 53 and is numbered within the week-numbering year rather than the calendar year."
+        }
+      ]
+    },
+    {
+      "name": "isRegExp",
+      "documented": true,
+      "categories": [
+        "type-checking-functions"
+      ],
+      "signatures": [
+        "isRegExp(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-checking-functions",
+          "anchor": "isRegExp",
+          "signatures": [
+            "isRegExp(value)"
+          ],
+          "description": "Returns true if _value_ is a RegExp (regular expression) object, false otherwise."
+        }
+      ]
+    },
+    {
+      "name": "isString",
+      "documented": true,
+      "categories": [
+        "type-checking-functions"
+      ],
+      "signatures": [
+        "isString(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-checking-functions",
+          "anchor": "isString",
+          "signatures": [
+            "isString(value)"
+          ],
+          "description": "Returns true if _value_ is a string, false otherwise."
+        }
+      ]
+    },
+    {
+      "name": "isTuple",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "isValid",
+      "documented": true,
+      "categories": [
+        "type-checking-functions"
+      ],
+      "signatures": [
+        "isValid(value)"
+      ],
+      "since": "5.4",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-checking-functions",
+          "anchor": "isValid",
+          "signatures": [
+            "isValid(value)"
+          ],
+          "description": "Returns true if _value_ is not `null`, `undefined`, or `NaN`, false otherwise."
+        }
+      ]
+    },
+    {
+      "name": "item",
+      "documented": true,
+      "categories": [
+        "event-functions"
+      ],
+      "signatures": [
+        "item()"
+      ],
+      "since": null,
+      "kind": "event",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "event-functions",
+          "anchor": "item",
+          "signatures": [
+            "item()"
+          ],
+          "description": "Returns the current scenegraph item that is the target of the event."
+        }
+      ]
+    },
+    {
+      "name": "join",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "join(array[, separator])"
+      ],
+      "since": "5.3",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "join",
+          "signatures": [
+            "join(array[, separator])"
+          ],
+          "description": "Returns a new string by concatenating all of the elements of the input _array_, separated by commas or a specified _separator_ string."
+        }
+      ]
+    },
+    {
+      "name": "lab",
+      "documented": true,
+      "categories": [
+        "color-functions"
+      ],
+      "signatures": [
+        "lab(l, a, b[, opacity])",
+        "lab(specifier)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "color-functions",
+          "anchor": "lab",
+          "signatures": [
+            "lab(l, a, b[, opacity])",
+            "lab(specifier)"
+          ],
+          "description": "Constructs a new [CIE LAB](https://en.wikipedia.org/wiki/Lab_color_space#CIELAB) color. If _l_, _a_ and _b_ are specified, these represent the channel values of the returned color; an _opacity_ may also be specified. If a CSS Color Module Level 3 _specifier_ string is specified, it is parsed and then converted to the LAB color space. Uses [d3-color's lab function](https://github.com/d3/d3-color#lab)."
+        }
+      ]
+    },
+    {
+      "name": "lassoAppend",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "lassoPath",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "lastindexof",
+      "documented": true,
+      "categories": [
+        "array-functions",
+        "string-functions"
+      ],
+      "signatures": [
+        "lastindexof(array, value)",
+        "lastindexof(string, substring)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "lastindexof",
+          "signatures": [
+            "lastindexof(array, value)"
+          ],
+          "description": "Returns the last index of _value_ in the input _array_."
+        },
+        {
+          "category": "string-functions",
+          "anchor": "string_lastindexof",
+          "signatures": [
+            "lastindexof(string, substring)"
+          ],
+          "description": "Returns the last index of _substring_ in the input _string_."
+        }
+      ]
+    },
+    {
+      "name": "length",
+      "documented": true,
+      "categories": [
+        "array-functions",
+        "string-functions"
+      ],
+      "signatures": [
+        "length(array)",
+        "length(string)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "length",
+          "signatures": [
+            "length(array)"
+          ],
+          "description": "Returns the length of the input _array_."
+        },
+        {
+          "category": "string-functions",
+          "anchor": "string_length",
+          "signatures": [
+            "length(string)"
+          ],
+          "description": "Returns the length of the input _string_."
+        }
+      ]
+    },
+    {
+      "name": "lerp",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "lerp(array, fraction)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "lerp",
+          "signatures": [
+            "lerp(array, fraction)"
+          ],
+          "description": "Returns the linearly interpolated value between the first and last entries in the _array_ for the provided interpolation _fraction_ (typically between 0 and 1). For example, `lerp([0, 50], 0.5)` returns 25."
+        }
+      ]
+    },
+    {
+      "name": "log",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "log(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "log",
+          "signatures": [
+            "log(value)"
+          ],
+          "description": "Returns the natural logarithm of _value_. Same as JavaScript's [`Math.log`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log)."
+        }
+      ]
+    },
+    {
+      "name": "lower",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "lower(string)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "lower",
+          "signatures": [
+            "lower(string)"
+          ],
+          "description": "Transforms _string_ to lower-case letters."
+        }
+      ]
+    },
+    {
+      "name": "luminance",
+      "documented": true,
+      "categories": [
+        "color-functions"
+      ],
+      "signatures": [
+        "luminance(specifier)"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "color-functions",
+          "anchor": "luminance",
+          "signatures": [
+            "luminance(specifier)"
+          ],
+          "description": "Returns the luminance for the given color _specifier_ (compatible with [d3-color's rgb function](https://github.com/d3/d3-color#rgb)). The luminance is calculated according to the [W3C Web Content Accessibility Guidelines](https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef)."
+        }
+      ]
+    },
+    {
+      "name": "max",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "max(value1, value2, ...)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "max",
+          "signatures": [
+            "max(value1, value2, ...)"
+          ],
+          "description": "Returns the maximum argument value. Same as JavaScript's [`Math.max`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max)."
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "documented": true,
+      "categories": [
+        "object-functions"
+      ],
+      "signatures": [
+        "merge(object1[, object2, ...])"
+      ],
+      "since": "4.0",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "object-functions",
+          "anchor": "merge",
+          "signatures": [
+            "merge(object1[, object2, ...])"
+          ],
+          "description": "Merges the input objects _object1_, _object2_, etc into a new output object. Inputs are visited in sequential order, such that key values from later arguments can overwrite those from earlier arguments. Example: `merge({a:1, b:2}, {a:3}) -> {a:3, b:2}`."
+        }
+      ]
+    },
+    {
+      "name": "milliseconds",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "milliseconds(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "milliseconds",
+          "signatures": [
+            "milliseconds(datetime)"
+          ],
+          "description": "Returns the milliseconds component for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "min",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "min(value1, value2, ...)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "min",
+          "signatures": [
+            "min(value1, value2, ...)"
+          ],
+          "description": "Returns the minimum argument value. Same as JavaScript's [`Math.min`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min)."
+        }
+      ]
+    },
+    {
+      "name": "minutes",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "minutes(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "minutes",
+          "signatures": [
+            "minutes(datetime)"
+          ],
+          "description": "Returns the minutes component for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "modify",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "month",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "month(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "month",
+          "signatures": [
+            "month(datetime)"
+          ],
+          "description": "Returns the (zero-based) month for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "monthAbbrevFormat",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "monthAbbrevFormat(month)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "monthAbbrevFormat",
+          "signatures": [
+            "monthAbbrevFormat(month)"
+          ],
+          "description": "Formats a (zero-based) _month_ number as an abbreviated month name, according to the current locale. For example: `monthAbbrevFormat(0) -> \"Jan\"`."
+        }
+      ]
+    },
+    {
+      "name": "monthFormat",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "monthFormat(month)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "monthFormat",
+          "signatures": [
+            "monthFormat(month)"
+          ],
+          "description": "Formats a (zero-based) _month_ number as a full month name, according to the current locale. For example: `monthFormat(0) -> \"January\"`."
+        }
+      ]
+    },
+    {
+      "name": "now",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "now()"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "now",
+          "signatures": [
+            "now()"
+          ],
+          "description": "Returns the timestamp for the current time."
+        }
+      ]
+    },
+    {
+      "name": "pad",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "pad(string, length[, character, align])"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "pad",
+          "signatures": [
+            "pad(string, length[, character, align])"
+          ],
+          "description": "Pads a _string_ value with repeated instances of a _character_ up to a specified _length_. If _character_ is not specified, a space (' ') is used. By default, padding is added to the end of a string. An optional _align_ parameter specifies if padding should be added to the `'left'` (beginning), `'center'`, or `'right'` (end) of the input string."
+        }
+      ]
+    },
+    {
+      "name": "panLinear",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "panLinear(domain, delta)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "panLinear",
+          "signatures": [
+            "panLinear(domain, delta)"
+          ],
+          "description": "Given a linear scale _domain_ array with numeric or datetime values, returns a new two-element domain array that is the result of panning the domain by a fractional _delta_. The _delta_ value represents fractional units of the scale range; for example, `0.5` indicates panning the scale domain to the right by half the scale range."
+        }
+      ]
+    },
+    {
+      "name": "panLog",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "panLog(domain, delta)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "panLog",
+          "signatures": [
+            "panLog(domain, delta)"
+          ],
+          "description": "Given a log scale _domain_ array with numeric or datetime values, returns a new two-element domain array that is the result of panning the domain by a fractional _delta_. The _delta_ value represents fractional units of the scale range; for example, `0.5` indicates panning the scale domain to the right by half the scale range."
+        }
+      ]
+    },
+    {
+      "name": "panPow",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "panPow(domain, delta, exponent)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "panPow",
+          "signatures": [
+            "panPow(domain, delta, exponent)"
+          ],
+          "description": "Given a power scale _domain_ array with numeric or datetime values and the given _exponent_, returns a new two-element domain array that is the result of panning the domain by a fractional _delta_. The _delta_ value represents fractional units of the scale range; for example, `0.5` indicates panning the scale domain to the right by half the scale range."
+        }
+      ]
+    },
+    {
+      "name": "panSymlog",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "panSymlog(domain, delta, constant)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "panSymlog",
+          "signatures": [
+            "panSymlog(domain, delta, constant)"
+          ],
+          "description": "Given a symmetric log scale _domain_ array with numeric or datetime values parameterized by the given _constant_, returns a new two-element domain array that is the result of panning the domain by a fractional _delta_. The _delta_ value represents fractional units of the scale range; for example, `0.5` indicates panning the scale domain to the right by half the scale range."
+        }
+      ]
+    },
+    {
+      "name": "parseFloat",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "parseFloat(string)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "parseFloat",
+          "signatures": [
+            "parseFloat(string)"
+          ],
+          "description": "Parses the input _string_ to a floating-point value. Same as JavaScript's `parseFloat`."
+        }
+      ]
+    },
+    {
+      "name": "parseInt",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "parseInt(string)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "parseInt",
+          "signatures": [
+            "parseInt(string)"
+          ],
+          "description": "Parses the input _string_ to an integer value. Same as JavaScript's `parseInt`."
+        }
+      ]
+    },
+    {
+      "name": "pathShape",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "peek",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "peek(array)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "peek",
+          "signatures": [
+            "peek(array)"
+          ],
+          "description": "Returns the last element in the input _array_. Similar to the built-in `Array.pop` method, except that it does not remove the last element. This method is a convenient shorthand for `array[array.length - 1]`."
+        }
+      ]
+    },
+    {
+      "name": "pinchAngle",
+      "documented": true,
+      "categories": [
+        "event-functions"
+      ],
+      "signatures": [
+        "pinchAngle(event)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "event-functions",
+          "anchor": "pinchAngle",
+          "signatures": [
+            "pinchAngle(event)"
+          ],
+          "description": "Returns the angle of the line connecting the first two touch points of a multi-touch event."
+        }
+      ]
+    },
+    {
+      "name": "pinchDistance",
+      "documented": true,
+      "categories": [
+        "event-functions"
+      ],
+      "signatures": [
+        "pinchDistance(event)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "event-functions",
+          "anchor": "pinchDistance",
+          "signatures": [
+            "pinchDistance(event)"
+          ],
+          "description": "Returns the pixel distance between the first two touch points of a multi-touch event."
+        }
+      ]
+    },
+    {
+      "name": "pluck",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "pluck(array, field)"
+      ],
+      "since": "5.19",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "pluck",
+          "signatures": [
+            "pluck(array, field)"
+          ],
+          "description": "Retrieves the value for the specified *field* from a given *array* of objects. The input *field* string may include nested properties (e.g., `foo.bar.bz`)."
+        }
+      ]
+    },
+    {
+      "name": "pow",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "pow(value, exponent)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "pow",
+          "signatures": [
+            "pow(value, exponent)"
+          ],
+          "description": "Returns _value_ raised to the given _exponent_. Same as JavaScript's [`Math.pow`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/pow)."
+        }
+      ]
+    },
+    {
+      "name": "quantileLogNormal",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "quantileLogNormal(probability[, mean, stdev])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "quantileLogNormal",
+          "signatures": [
+            "quantileLogNormal(probability[, mean, stdev])"
+          ],
+          "description": "Returns the quantile value (the inverse of the [cumulative distribution function](https://en.wikipedia.org/wiki/Cumulative_distribution_function)) for the given input _probability_, for a log-normal distribution with specified log _mean_ and log standard deviation _stdev_. If unspecified, the log mean defaults to `0` and the log standard deviation defaults to `1`."
+        }
+      ]
+    },
+    {
+      "name": "quantileNormal",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "quantileNormal(probability[, mean, stdev])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "quantileNormal",
+          "signatures": [
+            "quantileNormal(probability[, mean, stdev])"
+          ],
+          "description": "Returns the quantile value (the inverse of the [cumulative distribution function](https://en.wikipedia.org/wiki/Cumulative_distribution_function)) for the given input _probability_, for a normal distribution with specified _mean_ and standard deviation _stdev_. If unspecified, the mean defaults to `0` and the standard deviation defaults to `1`."
+        }
+      ]
+    },
+    {
+      "name": "quantileUniform",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "quantileUniform(probability[, min, max])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "quantileUniform",
+          "signatures": [
+            "quantileUniform(probability[, min, max])"
+          ],
+          "description": "Returns the quantile value (the inverse of the [cumulative distribution function](https://en.wikipedia.org/wiki/Cumulative_distribution_function)) for the given input _probability_,  for a uniform distribution over the interval [_min_, _max_). If unspecified, _min_ defaults to `0` and _max_ defaults to `1`. If only one argument is provided, it is interpreted as the _max_ value."
+        }
+      ]
+    },
+    {
+      "name": "quarter",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "quarter(datetime)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "quarter",
+          "signatures": [
+            "quarter(datetime)"
+          ],
+          "description": "Returns the quarter of the year (0-3) for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "random",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "random()"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "random",
+          "signatures": [
+            "random()"
+          ],
+          "description": "Returns a pseudo-random number in the range [0,1). Same as JavaScript's [`Math.random`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)."
+        }
+      ]
+    },
+    {
+      "name": "range",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "range(name[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "range",
+          "signatures": [
+            "range(name[, group])"
+          ],
+          "description": "Returns the scale range array for the named scale transform, or an empty array if the scale is not found. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale."
+        }
+      ]
+    },
+    {
+      "name": "regexp",
+      "documented": true,
+      "categories": [
+        "regexp-functions"
+      ],
+      "signatures": [
+        "regexp(pattern[, flags])"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "regexp-functions",
+          "anchor": "regexp",
+          "signatures": [
+            "regexp(pattern[, flags])"
+          ],
+          "description": "Creates a regular expression instance from an input _pattern_ string and optional _flags_. Same as [JavaScript's `RegExp`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp)."
+        }
+      ]
+    },
+    {
+      "name": "replace",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "replace(string, pattern, replacement)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "replace",
+          "signatures": [
+            "replace(string, pattern, replacement)"
+          ],
+          "description": "Returns a new string with some or all matches of _pattern_ replaced by a _replacement_ string. The _pattern_ can be a string or a regular expression. If _pattern_ is a string, only the first instance will be replaced. Same as [JavaScript's String.replace](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace)."
+        }
+      ]
+    },
+    {
+      "name": "reverse",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "reverse(array)"
+      ],
+      "since": "5.3",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "reverse",
+          "signatures": [
+            "reverse(array)"
+          ],
+          "description": "Returns a new array with elements in a reverse order of the input _array_. The first array element becomes the last, and the last array element becomes the first."
+        }
+      ]
+    },
+    {
+      "name": "rgb",
+      "documented": true,
+      "categories": [
+        "color-functions"
+      ],
+      "signatures": [
+        "rgb(r, g, b[, opacity])",
+        "rgb(specifier)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "color-functions",
+          "anchor": "rgb",
+          "signatures": [
+            "rgb(r, g, b[, opacity])",
+            "rgb(specifier)"
+          ],
+          "description": "Constructs a new [RGB](https://en.wikipedia.org/wiki/RGB_color_model) color. If _r_, _g_ and _b_ are specified, these represent the channel values of the returned color; an _opacity_ may also be specified. If a CSS Color Module Level 3 _specifier_ string is specified, it is parsed and then converted to the RGB color space. Uses [d3-color's rgb function](https://github.com/d3/d3-color#rgb)."
+        }
+      ]
+    },
+    {
+      "name": "round",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "round(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "round",
+          "signatures": [
+            "round(value)"
+          ],
+          "description": "Rounds _value_ to the nearest integer. Same as JavaScript's [`Math.round`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round)."
+        }
+      ]
+    },
+    {
+      "name": "sampleLogNormal",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "sampleLogNormal([mean, stdev])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "sampleLogNormal",
+          "signatures": [
+            "sampleLogNormal([mean, stdev])"
+          ],
+          "description": "Returns a sample from a univariate [log-normal probability distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) with specified log _mean_ and log standard deviation _stdev_. If unspecified, the log mean defaults to `0` and the log standard deviation defaults to `1`."
+        }
+      ]
+    },
+    {
+      "name": "sampleNormal",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "sampleNormal([mean, stdev])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "sampleNormal",
+          "signatures": [
+            "sampleNormal([mean, stdev])"
+          ],
+          "description": "Returns a sample from a univariate [normal (Gaussian) probability distribution](https://en.wikipedia.org/wiki/Normal_distribution) with specified _mean_ and standard deviation _stdev_. If unspecified, the mean defaults to `0` and the standard deviation defaults to `1`."
+        }
+      ]
+    },
+    {
+      "name": "sampleUniform",
+      "documented": true,
+      "categories": [
+        "statistical-functions"
+      ],
+      "signatures": [
+        "sampleUniform([min, max])"
+      ],
+      "since": "5.7",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "statistical-functions",
+          "anchor": "sampleUniform",
+          "signatures": [
+            "sampleUniform([min, max])"
+          ],
+          "description": "Returns a sample from a univariate [continuous uniform probability distribution](https://en.wikipedia.org/wiki/Continuous_uniform_distribution) over the interval [_min_, _max_). If unspecified, _min_ defaults to `0` and _max_ defaults to `1`. If only one argument is provided, it is interpreted as the _max_ value."
+        }
+      ]
+    },
+    {
+      "name": "scale",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "scale(name, value[, group])"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "scale",
+          "signatures": [
+            "scale(name, value[, group])"
+          ],
+          "description": "Applies the named scale transform (or projection) to the specified _value_. The optional _group_ argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale or projection."
+        }
+      ]
+    },
+    {
+      "name": "screen",
+      "documented": true,
+      "categories": [
+        "browser-functions"
+      ],
+      "signatures": [
+        "screen()"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "browser-functions",
+          "anchor": "screen",
+          "signatures": [
+            "screen()"
+          ],
+          "description": "Returns the [`window.screen`](https://developer.mozilla.org/en-US/docs/Web/API/Window/screen) object, or `{}` if Vega is not running in a browser environment."
+        }
+      ]
+    },
+    {
+      "name": "seconds",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "seconds(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "seconds",
+          "signatures": [
+            "seconds(datetime)"
+          ],
+          "description": "Returns the seconds component for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "sequence",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "sequence([start, ]stop[, step])"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "sequence",
+          "signatures": [
+            "sequence([start, ]stop[, step])"
+          ],
+          "description": "Returns an array containing an arithmetic sequence of numbers. If _step_ is omitted, it defaults to 1. If _start_ is omitted, it defaults to 0. The _stop_ value is exclusive; it is not included in the result. If _step_ is positive, the last element is the largest _start + i * step_ less than _stop_; if _step_ is negative, the last element is the smallest _start + i * step_ greater than _stop_. If the returned array would contain an infinite number of values, an empty range is returned. The arguments are not required to be integers."
+        }
+      ]
+    },
+    {
+      "name": "setdata",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "sin",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "sin(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "sin",
+          "signatures": [
+            "sin(value)"
+          ],
+          "description": "Trigonometric sine. Same as JavaScript's [`Math.sin`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sin)."
+        }
+      ]
+    },
+    {
+      "name": "slice",
+      "documented": true,
+      "categories": [
+        "array-functions",
+        "string-functions"
+      ],
+      "signatures": [
+        "slice(array, start[, end])",
+        "slice(string, start[, end])"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "slice",
+          "signatures": [
+            "slice(array, start[, end])"
+          ],
+          "description": "Returns a section of _array_ between the _start_ and _end_ indices. If the _end_ argument is negative, it is treated as an offset from the end of the array (_length(array) + end_)."
+        },
+        {
+          "category": "string-functions",
+          "anchor": "string_slice",
+          "signatures": [
+            "slice(string, start[, end])"
+          ],
+          "description": "Returns a section of _string_ between the _start_ and _end_ indices. If the _end_ argument is negative, it is treated as an offset from the end of the string (_length(string) + end_)."
+        }
+      ]
+    },
+    {
+      "name": "sort",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "sort(array)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "sort",
+          "signatures": [
+            "sort(array)"
+          ],
+          "description": "(since Vega 5.31)\n\nSorts the array in natural order using [ascending from Vega Utils](https://vega.github.io/vega/docs/api/util/#ascending)."
+        }
+      ]
+    },
+    {
+      "name": "span",
+      "documented": true,
+      "categories": [
+        "array-functions"
+      ],
+      "signatures": [
+        "span(array)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "array-functions",
+          "anchor": "span",
+          "signatures": [
+            "span(array)"
+          ],
+          "description": "Returns the span of _array_: the difference between the last and first elements, or _array[array.length-1] - array[0]_."
+        }
+      ]
+    },
+    {
+      "name": "split",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "split(string, separator[, limit])"
+      ],
+      "since": "4.3",
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "string_split",
+          "signatures": [
+            "split(string, separator[, limit])"
+          ],
+          "description": "Returns an array of tokens created by splitting the input _string_ according to a provided _separator_ pattern. The result can optionally be constrained to return at most _limit_ tokens."
+        }
+      ]
+    },
+    {
+      "name": "sqrt",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "sqrt(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "sqrt",
+          "signatures": [
+            "sqrt(value)"
+          ],
+          "description": "Square root function. Same as JavaScript's [`Math.sqrt`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sqrt)."
+        }
+      ]
+    },
+    {
+      "name": "substring",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "substring(string, start[, end])"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "substring",
+          "signatures": [
+            "substring(string, start[, end])"
+          ],
+          "description": "Returns a section of _string_ between the _start_ and _end_ indices."
+        }
+      ]
+    },
+    {
+      "name": "tan",
+      "documented": true,
+      "categories": [
+        "math-functions"
+      ],
+      "signatures": [
+        "tan(value)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "math-functions",
+          "anchor": "tan",
+          "signatures": [
+            "tan(value)"
+          ],
+          "description": "Trigonometric tangent. Same as JavaScript's [`Math.tan`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/tan)."
+        }
+      ]
+    },
+    {
+      "name": "test",
+      "documented": true,
+      "categories": [
+        "regexp-functions"
+      ],
+      "signatures": [
+        "test(regexp[, string])"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "regexp-functions",
+          "anchor": "test",
+          "signatures": [
+            "test(regexp[, string])"
+          ],
+          "description": "Evaluates a regular expression _regexp_ against the input _string_, returning `true` if the string matches the pattern, `false` otherwise. For example: `test(/\\\\d{3}/, \"32-21-9483\") -> true`."
+        }
+      ]
+    },
+    {
+      "name": "time",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "time(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "time",
+          "signatures": [
+            "time(datetime)"
+          ],
+          "description": "Returns the epoch-based timestamp for the given _datetime_ value."
+        }
+      ]
+    },
+    {
+      "name": "timeFormat",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "timeFormat(value, specifier)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "timeFormat",
+          "signatures": [
+            "timeFormat(value, specifier)"
+          ],
+          "description": "Formats a datetime _value_ (either a `Date` object or timestamp) as a string, according to the local time. The _specifier_ must be a valid [d3-time-format specifier](https://github.com/d3/d3-time-format/) or [TimeMultiFormat object](https://vega.github.io/vega/docs/types/#TimeMultiFormat) (since Vega 5.8). For example: `timeFormat(timestamp, '%A')`.\nNull values are formatted as `\"null\"`."
+        }
+      ]
+    },
+    {
+      "name": "timeOffset",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "timeOffset(unit, date[, step])"
+      ],
+      "since": "5.8",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "timeOffset",
+          "signatures": [
+            "timeOffset(unit, date[, step])"
+          ],
+          "description": "Returns a new `Date` instance that offsets the given _date_ by the specified time [_unit_](https://vega.github.io/vega/docs/api/time/#time-units) in the local timezone. The optional _step_ argument indicates the number of time unit steps to offset by (default 1)."
+        }
+      ]
+    },
+    {
+      "name": "timeParse",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "timeParse(string, specifier)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "timeParse",
+          "signatures": [
+            "timeParse(string, specifier)"
+          ],
+          "description": "Parses a _string_ value to a Date object, according to the local time. The _specifier_ must be a valid [d3-time-format specifier](https://github.com/d3/d3-time-format/). For example: `timeParse('June 30, 2015', '%B %d, %Y')`."
+        }
+      ]
+    },
+    {
+      "name": "timeSequence",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "timeSequence(unit, start, stop[, step])"
+      ],
+      "since": "5.8",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "timeSequence",
+          "signatures": [
+            "timeSequence(unit, start, stop[, step])"
+          ],
+          "description": "Returns an array of `Date` instances from _start_ (inclusive) to _stop_ (exclusive), with each entry separated by the given time [_unit_](https://vega.github.io/vega/docs/api/time/#time-units) in the local timezone. The optional _step_ argument indicates the number of time unit steps to take between each sequence entry (default 1)."
+        }
+      ]
+    },
+    {
+      "name": "timeUnitSpecifier",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "timeUnitSpecifier(units[, specifiers])"
+      ],
+      "since": "5.8",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "timeUnitSpecifier",
+          "signatures": [
+            "timeUnitSpecifier(units[, specifiers])"
+          ],
+          "description": "Returns a time format specifier string for the given time [_units_](https://vega.github.io/vega/docs/api/time/#time-units). The optional _specifiers_ object provides a set of specifier sub-strings for customizing the format; for more, see the [timeUnitSpecifier API documentation](https://vega.github.io/vega/docs/api/time/#timeUnitSpecifier). The resulting specifier string can then be used as input to the [timeFormat](https://vega.github.io/vega/docs/expressions/#timeFormat) or [utcFormat](https://vega.github.io/vega/docs/expressions/#utcFormat) functions, or as the _format_ parameter of an axis or legend. For example: `timeFormat(date, timeUnitSpecifier('year'))` or `timeFormat(date, timeUnitSpecifier(['hours', 'minutes']))`."
+        }
+      ]
+    },
+    {
+      "name": "timezoneoffset",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "timezoneoffset(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "timezoneoffset",
+          "signatures": [
+            "timezoneoffset(datetime)"
+          ],
+          "description": "Returns the timezone offset from the local timezone to UTC for the given _datetime_ value."
+        }
+      ]
+    },
+    {
+      "name": "toBoolean",
+      "documented": true,
+      "categories": [
+        "type-coercion-functions"
+      ],
+      "signatures": [
+        "toBoolean(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-coercion-functions",
+          "anchor": "toBoolean",
+          "signatures": [
+            "toBoolean(value)"
+          ],
+          "description": "Coerces the input _value_ to a string. Null values and empty strings are mapped to `null`."
+        }
+      ]
+    },
+    {
+      "name": "toDate",
+      "documented": true,
+      "categories": [
+        "type-coercion-functions"
+      ],
+      "signatures": [
+        "toDate(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-coercion-functions",
+          "anchor": "toDate",
+          "signatures": [
+            "toDate(value)"
+          ],
+          "description": "Coerces the input _value_ to a Date instance. Null values and empty strings are mapped to `null`. If an optional _parser_ function is provided, it is used to perform date parsing, otherwise `Date.parse` is used. Be aware that `Date.parse` has different implementations across browsers!"
+        }
+      ]
+    },
+    {
+      "name": "toNumber",
+      "documented": true,
+      "categories": [
+        "type-coercion-functions"
+      ],
+      "signatures": [
+        "toNumber(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-coercion-functions",
+          "anchor": "toNumber",
+          "signatures": [
+            "toNumber(value)"
+          ],
+          "description": "Coerces the input _value_ to a number. Null values and empty strings are mapped to `null`."
+        }
+      ]
+    },
+    {
+      "name": "toString",
+      "documented": true,
+      "categories": [
+        "type-coercion-functions"
+      ],
+      "signatures": [
+        "toString(value)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "type-coercion-functions",
+          "anchor": "toString",
+          "signatures": [
+            "toString(value)"
+          ],
+          "description": "Coerces the input _value_ to a string. Null values and empty strings are mapped to `null`."
+        }
+      ]
+    },
+    {
+      "name": "treeAncestors",
+      "documented": true,
+      "categories": [
+        "tree-functions"
+      ],
+      "signatures": [
+        "treeAncestors(name, node)"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "tree-functions",
+          "anchor": "treeAncestors",
+          "signatures": [
+            "treeAncestors(name, node)"
+          ],
+          "description": "For the hierarchy data set with the given _name_, returns the array of ancestors nodes, starting with the input _node_, then followed by each parent up to the root."
+        }
+      ]
+    },
+    {
+      "name": "treePath",
+      "documented": true,
+      "categories": [
+        "tree-functions"
+      ],
+      "signatures": [
+        "treePath(name, source, target)"
+      ],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "tree-functions",
+          "anchor": "treePath",
+          "signatures": [
+            "treePath(name, source, target)"
+          ],
+          "description": "For the hierarchy data set with the given _name_, returns the shortest path through from the _source_ node id to the _target_ node id. The path starts at the _source_ node, ascends to the least common ancestor of the _source_ node and the _target_ node, and then descends to the _target_ node."
+        }
+      ]
+    },
+    {
+      "name": "trim",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "trim(string)"
+      ],
+      "since": "5.3",
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "trim",
+          "signatures": [
+            "trim(string)"
+          ],
+          "description": "Returns a trimmed string with preceding and trailing whitespace removed."
+        }
+      ]
+    },
+    {
+      "name": "truncate",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "truncate(string, length[, align, ellipsis])"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "truncate",
+          "signatures": [
+            "truncate(string, length[, align, ellipsis])"
+          ],
+          "description": "Truncates an input _string_ to a target _length_. The optional _align_ argument indicates what part of the string should be truncated: `'left'` (the beginning), `'center'`, or `'right'` (the end). By default, the `'right'` end of the string is truncated. The optional _ellipsis_ argument indicates the string to use to indicate truncated content; by default the ellipsis character `…` (`\\u2026`) is used."
+        }
+      ]
+    },
+    {
+      "name": "upper",
+      "documented": true,
+      "categories": [
+        "string-functions"
+      ],
+      "signatures": [
+        "upper(string)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "string-functions",
+          "anchor": "upper",
+          "signatures": [
+            "upper(string)"
+          ],
+          "description": "Transforms _string_ to upper-case letters."
+        }
+      ]
+    },
+    {
+      "name": "utc",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utc(year, month[, day, hour, min, sec, millisec])"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utc",
+          "signatures": [
+            "utc(year, month[, day, hour, min, sec, millisec])"
+          ],
+          "description": "Returns a timestamp for the given UTC date. The _month_ is 0-based, such that `1` represents February."
+        }
+      ]
+    },
+    {
+      "name": "utcdate",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcdate(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcdate",
+          "signatures": [
+            "utcdate(datetime)"
+          ],
+          "description": "Returns the day of the month for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "utcday",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcday(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcday",
+          "signatures": [
+            "utcday(datetime)"
+          ],
+          "description": "Returns the day of the week for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "utcdayofyear",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcdayofyear(datetime)"
+      ],
+      "since": "5.11",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcdayofyear",
+          "signatures": [
+            "utcdayofyear(datetime)"
+          ],
+          "description": "Returns the one-based day of the year for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "utcFormat",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "utcFormat(value, specifier)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "utcFormat",
+          "signatures": [
+            "utcFormat(value, specifier)"
+          ],
+          "description": "Formats a datetime _value_ (either a `Date` object or timestamp) as a string, according to [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) time. The _specifier_ must be a valid [d3-time-format specifier](https://github.com/d3/d3-time-format/) or [TimeMultiFormat object](https://vega.github.io/vega/docs/types/#TimeMultiFormat) (since Vega 5.8). For example: `utcFormat(timestamp, '%A')`.\nNull values are formatted as `\"null\"`."
+        }
+      ]
+    },
+    {
+      "name": "utchours",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utchours(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utchours",
+          "signatures": [
+            "utchours(datetime)"
+          ],
+          "description": "Returns the hours component for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "utcisoweek",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcisoweek(date)"
+      ],
+      "since": "6.4",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcisoweek",
+          "signatures": [
+            "utcisoweek(date)"
+          ],
+          "description": "Returns the [ISO 8601](https://en.wikipedia.org/wiki/ISO_week_date) week number for the given _datetime_, in UTC time. Weeks start on Monday and week 1 is the week that contains January 4, so the result is between 1 and 53 and is numbered within the week-numbering year rather than the calendar year."
+        }
+      ]
+    },
+    {
+      "name": "utcmilliseconds",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcmilliseconds(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcmilliseconds",
+          "signatures": [
+            "utcmilliseconds(datetime)"
+          ],
+          "description": "Returns the milliseconds component for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "utcminutes",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcminutes(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcminutes",
+          "signatures": [
+            "utcminutes(datetime)"
+          ],
+          "description": "Returns the minutes component for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "utcmonth",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcmonth(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcmonth",
+          "signatures": [
+            "utcmonth(datetime)"
+          ],
+          "description": "Returns the (zero-based) month for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "utcOffset",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcOffset(unit, date[, step])"
+      ],
+      "since": "5.8",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcOffset",
+          "signatures": [
+            "utcOffset(unit, date[, step])"
+          ],
+          "description": "Returns a new `Date` instance that offsets the given _date_ by the specified time [_unit_](https://vega.github.io/vega/docs/api/time/#time-units) in UTC time. The optional _step_ argument indicates the number of time unit steps to offset by (default 1)."
+        }
+      ]
+    },
+    {
+      "name": "utcParse",
+      "documented": true,
+      "categories": [
+        "format-functions"
+      ],
+      "signatures": [
+        "utcParse(value, specifier)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "format-functions",
+          "anchor": "utcParse",
+          "signatures": [
+            "utcParse(value, specifier)"
+          ],
+          "description": "Parses a _string_ value to a Date object, according to [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) time. The _specifier_ must be a valid [d3-time-format specifier](https://github.com/d3/d3-time-format/). For example: `utcParse('June 30, 2015', '%B %d, %Y')`."
+        }
+      ]
+    },
+    {
+      "name": "utcquarter",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcquarter(datetime)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcquarter",
+          "signatures": [
+            "utcquarter(datetime)"
+          ],
+          "description": "Returns the quarter of the year (0-3) for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "utcseconds",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcseconds(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcseconds",
+          "signatures": [
+            "utcseconds(datetime)"
+          ],
+          "description": "Returns the seconds component for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "utcSequence",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcSequence(unit, start, stop[, step])"
+      ],
+      "since": "5.8",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcSequence",
+          "signatures": [
+            "utcSequence(unit, start, stop[, step])"
+          ],
+          "description": "Returns an array of `Date` instances from _start_ (inclusive) to _stop_ (exclusive), with each entry separated by the given time [_unit_](https://vega.github.io/vega/docs/api/time/#time-units) in UTC time. The optional _step_ argument indicates the number of time unit steps to take between each sequence entry (default 1)."
+        }
+      ]
+    },
+    {
+      "name": "utcweek",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcweek(date)"
+      ],
+      "since": "5.11",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcweek",
+          "signatures": [
+            "utcweek(date)"
+          ],
+          "description": "Returns the week number of the year for the given _datetime_, in UTC time. This function assumes Sunday-based weeks. Days before the first Sunday of the year are considered to be in week 0, the first Sunday of the year is the start of week 1, the second Sunday week 2, _etc._."
+        }
+      ]
+    },
+    {
+      "name": "utcyear",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "utcyear(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "utcyear",
+          "signatures": [
+            "utcyear(datetime)"
+          ],
+          "description": "Returns the year for the given _datetime_ value, in UTC time."
+        }
+      ]
+    },
+    {
+      "name": "view",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "event",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "vlSelectionIdTest",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "vlSelectionResolve",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "vlSelectionTest",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "vlSelectionTuples",
+      "documented": false,
+      "categories": [],
+      "signatures": [],
+      "since": null,
+      "kind": "registered",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": []
+    },
+    {
+      "name": "warn",
+      "documented": true,
+      "categories": [
+        "logging-functions"
+      ],
+      "signatures": [
+        "warn(value1[, value2, ...])"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "logging-functions",
+          "anchor": "warn",
+          "signatures": [
+            "warn(value1[, value2, ...])"
+          ],
+          "description": "Logs a warning message and returns the last argument. For the message to appear in the console, the visualization view must have the appropriate logging level set."
+        }
+      ]
+    },
+    {
+      "name": "week",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "week(date)"
+      ],
+      "since": "5.11",
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "week",
+          "signatures": [
+            "week(date)"
+          ],
+          "description": "Returns the week number of the year for the given _datetime_, in local time. This function assumes Sunday-based weeks. Days before the first Sunday of the year are considered to be in week 0, the first Sunday of the year is the start of week 1, the second Sunday week 2, _etc._."
+        }
+      ]
+    },
+    {
+      "name": "windowSize",
+      "documented": true,
+      "categories": [
+        "browser-functions"
+      ],
+      "signatures": [
+        "windowSize()"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "browser-functions",
+          "anchor": "windowSize",
+          "signatures": [
+            "windowSize()"
+          ],
+          "description": "Returns the current window size (`[window.innerWidth, window.innerHeight]`) or `[undefined, undefined]` if Vega is not running in a browser environment."
+        }
+      ]
+    },
+    {
+      "name": "x",
+      "documented": true,
+      "categories": [
+        "event-functions"
+      ],
+      "signatures": [
+        "x([item])"
+      ],
+      "since": null,
+      "kind": "event",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "event-functions",
+          "anchor": "x",
+          "signatures": [
+            "x([item])"
+          ],
+          "description": "Returns the x coordinate for the current event. If no arguments are provided, the top-level coordinate space of the view is used. If a scenegraph _item_ (or string group name) is provided, the coordinate space of the group item is used."
+        }
+      ]
+    },
+    {
+      "name": "xy",
+      "documented": true,
+      "categories": [
+        "event-functions"
+      ],
+      "signatures": [
+        "xy([item])"
+      ],
+      "since": null,
+      "kind": "event",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "event-functions",
+          "anchor": "xy",
+          "signatures": [
+            "xy([item])"
+          ],
+          "description": "Returns the x- and y-coordinates for the current event as a two-element array. If no arguments are provided, the top-level coordinate space of the view is used. If a scenegraph _item_ (or string group name) is provided, the coordinate space of the group item is used."
+        }
+      ]
+    },
+    {
+      "name": "y",
+      "documented": true,
+      "categories": [
+        "event-functions"
+      ],
+      "signatures": [
+        "y([item])"
+      ],
+      "since": null,
+      "kind": "event",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "event-functions",
+          "anchor": "y",
+          "signatures": [
+            "y([item])"
+          ],
+          "description": "Returns the y coordinate for the current event. If no arguments are provided, the top-level coordinate space of the view is used. If a scenegraph _item_ (or string group name) is provided, the coordinate space of the group item is used."
+        }
+      ]
+    },
+    {
+      "name": "year",
+      "documented": true,
+      "categories": [
+        "datetime-functions"
+      ],
+      "signatures": [
+        "year(datetime)"
+      ],
+      "since": null,
+      "kind": "builtin",
+      "definedIn": "packages/vega-expression/src/functions.js",
+      "docs": [
+        {
+          "category": "datetime-functions",
+          "anchor": "year",
+          "signatures": [
+            "year(datetime)"
+          ],
+          "description": "Returns the year for the given _datetime_ value, in local time."
+        }
+      ]
+    },
+    {
+      "name": "zoomLinear",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "zoomLinear(domain, anchor, scaleFactor)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "zoomLinear",
+          "signatures": [
+            "zoomLinear(domain, anchor, scaleFactor)"
+          ],
+          "description": "Given a linear scale _domain_ array with numeric or datetime values, returns a new two-element domain array that is the result of zooming the domain by a _scaleFactor_, centered at the provided fractional _anchor_. The _anchor_ value represents the zoom position in terms of fractional units of the scale range; for example, `0.5` indicates a zoom centered on the mid-point of the scale range."
+        }
+      ]
+    },
+    {
+      "name": "zoomLog",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "zoomLog(domain, anchor, scaleFactor)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "zoomLog",
+          "signatures": [
+            "zoomLog(domain, anchor, scaleFactor)"
+          ],
+          "description": "Given a log scale _domain_ array with numeric or datetime values, returns a new two-element domain array that is the result of zooming the domain by a _scaleFactor_, centered at the provided fractional _anchor_. The _anchor_ value represents the zoom position in terms of fractional units of the scale range; for example, `0.5` indicates a zoom centered on the mid-point of the scale range."
+        }
+      ]
+    },
+    {
+      "name": "zoomPow",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "zoomPow(domain, anchor, scaleFactor, exponent)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "zoomPow",
+          "signatures": [
+            "zoomPow(domain, anchor, scaleFactor, exponent)"
+          ],
+          "description": "Given a power scale _domain_ array with numeric or datetime values and the given _exponent_, returns a new two-element domain array that is the result of zooming the domain by a _scaleFactor_, centered at the provided fractional _anchor_. The _anchor_ value represents the zoom position in terms of fractional units of the scale range; for example, `0.5` indicates a zoom centered on the mid-point of the scale range."
+        }
+      ]
+    },
+    {
+      "name": "zoomSymlog",
+      "documented": true,
+      "categories": [
+        "scale-functions"
+      ],
+      "signatures": [
+        "zoomSymlog(domain, anchor, scaleFactor, constant)"
+      ],
+      "since": null,
+      "kind": "context",
+      "definedIn": "packages/vega-functions/src/codegen.js",
+      "docs": [
+        {
+          "category": "scale-functions",
+          "anchor": "zoomSymlog",
+          "signatures": [
+            "zoomSymlog(domain, anchor, scaleFactor, constant)"
+          ],
+          "description": "Given a symmetric log scale _domain_ array with numeric or datetime values parameterized by the given _constant_, returns a new two-element domain array that is the result of zooming the domain by a _scaleFactor_, centered at the provided fractional _anchor_. The _anchor_ value represents the zoom position in terms of fractional units of the scale range; for example, `0.5` indicates a zoom centered on the mid-point of the scale range."
+        }
+      ]
+    }
+  ]
+}

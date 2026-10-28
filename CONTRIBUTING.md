@@ -26,6 +26,11 @@ The catalogues under `exports/` are extracted from the official JSON Schemas by
 channels, transforms, scale types and properties that are in them, and `Validate` fails otherwise.
 If a name is missing, the fix is a new schema version and a re-extraction, not a hand edit.
 
+Expression functions and event streams follow the same rule against the Vega source pinned in
+`scripts/vega_sources.py`. To move to a new Vega version, change `VERSION` and `COMMIT` there, run
+`python scripts/vega_sources.py --fetch`, paste the printed SHA-256 pins into `FILES`, and run
+`python scripts/extract_catalog.py`. Never edit a file under `sources/` or `reference/vega/`.
+
 ## License
 
 By contributing, you agree that your contribution is licensed under the [MIT License](LICENSE).
