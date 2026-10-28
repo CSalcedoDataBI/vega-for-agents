@@ -94,14 +94,81 @@ class TestNameCheck(unittest.TestCase):
         self.assertTrue(any("transform 'frobnicate'" in e for e in errs))
 
 
+class TestExpressionAndEventCheck(unittest.TestCase):
+    def setUp(self):
+        self.cats = cr.load_catalogs()
+        self.lang = cr.load_language()
+        self.assertIsNotNone(self.lang)
+
+    def v(self, spec, lang):
+        return cr.validate_spec(spec, lang, self.cats[lang], "T", self.lang)
+
+    def test_valid_expressions_and_events(self):
+        spec = {
+            "signals": [{"name": "w", "update": "containerSize()[0]",
+                         "on": [{"events": "container:resize", "update": "containerSize()[0]"},
+                                {"events": "[rect:mousedown, window:mouseup] > window:mousemove",
+                                 "update": "clamp(x(), 0, width)"},
+                                {"events": "@cell:click[event.shiftKey]", "update": "item()"},
+                                {"events": "timer{1000}", "update": "now()"},
+                                {"events": "window:resize", "update": "windowSize()[0]"}]}],
+            "marks": [{"type": "text", "encode": {"update": {
+                "text": {"signal": "format(datum.v, ',.2f') + upper('abc(')"}}}}],
+        }
+        self.assertEqual(self.v(spec, "vega"), [])
+        vl_spec = {"mark": "bar", "transform": [{"calculate": "toNumber(datum.a)", "as": "n"}],
+                   "params": [{"name": "p", "select": {"type": "point", "on": "click",
+                                                       "clear": "dblclick"}}]}
+        self.assertEqual(self.v(vl_spec, "vega-lite"), [])
+
+    def test_invented_function(self):
+        errs = self.v({"signals": [{"name": "s", "update": "toUpperCase(datum.a)"}]}, "vega")
+        self.assertTrue(any("function 'toUpperCase'" in e for e in errs))
+        errs = self.v({"mark": "bar", "transform": [{"filter": "pbiFormat(datum.a, '0')"}]},
+                      "vega-lite")
+        self.assertTrue(any("function 'pbiFormat'" in e for e in errs))
+
+    def test_invented_event_type_and_mark(self):
+        errs = self.v({"signals": [{"name": "s", "on": [{"events": "rect:hover"}]}]}, "vega")
+        self.assertTrue(any("event type 'hover'" in e for e in errs))
+        errs = self.v({"signals": [{"name": "s", "on": [{"events": "bar:click"}]}]}, "vega")
+        self.assertTrue(any("'bar'" in e and "CSS selector" in e for e in errs))
+        errs = self.v({"signals": [{"name": "s", "on": [{"events": "resize"}]}]}, "vega")
+        self.assertTrue(any("'container' source" in e for e in errs))
+
+    def test_bad_selector_and_filter(self):
+        errs = self.v({"signals": [{"name": "s", "on": [{"events": "click["}]}]}, "vega")
+        self.assertTrue(any("does not parse" in e for e in errs))
+        errs = self.v({"signals": [{"name": "s", "on": [{"events": "click[shiftKey()]"}]}]}, "vega")
+        self.assertTrue(any("function 'shiftKey'" in e for e in errs))
+
+    def test_card_with_invented_call_fails(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "exports").mkdir()
+            for name in (cr.EXPRESSIONS, cr.EVENT_STREAMS):
+                (root / name).write_bytes((cr.ROOT / name).read_bytes())
+            (root / "reference").mkdir()
+            (root / "reference" / "card.md").write_text(
+                "Use `abs(x)` and `clamp(easeElastic(t), 0, 1)`, never `ucase(s)`.\n"
+                "Prose like `f(0) === 0` is not a call.\n", encoding="utf-8")
+            errs = cr.check_cards(root)
+            self.assertEqual(len(errs), 1)
+            self.assertIn("'ucase'", errs[0])
+
+
 class TestRepoShape(unittest.TestCase):
     def test_catalogs_present(self):
         self.assertTrue((cr.ROOT / "exports" / "vega-lite-v5.catalog.json").exists())
         self.assertTrue((cr.ROOT / "exports" / "vega-v5.catalog.json").exists())
+        self.assertTrue((cr.ROOT / cr.EXPRESSIONS).exists())
+        self.assertTrue((cr.ROOT / cr.EVENT_STREAMS).exists())
 
     def test_full_repo_check_passes(self):
         """The repository as committed passes every check."""
-        self.assertEqual(cr.check_skills() + cr.check_workflows() + cr.check_names(), [])
+        self.assertEqual(cr.check_skills() + cr.check_workflows() + cr.check_names()
+                         + cr.check_cards(), [])
 
 
 if __name__ == "__main__":

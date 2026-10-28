@@ -1,0 +1,365 @@
+{
+  "meta": {
+    "language": "vega",
+    "vocabulary": "event streams",
+    "vegaVersion": "6.4.0",
+    "source": "https://github.com/vega/vega/tree/adf0ae7cd5dbc5bd0d7b4fb5566a68adf14cac3f",
+    "commit": "adf0ae7cd5dbc5bd0d7b4fb5566a68adf14cac3f",
+    "packages": {
+      "vega-functions": "6.2.0",
+      "vega-expression": "6.2.2",
+      "vega-event-selector": "4.0.0"
+    },
+    "vendoredAt": "sources/vega-6.4.0",
+    "license": "BSD-3-Clause (sources/vega-6.4.0/LICENSE)",
+    "files": {
+      "docs/docs/event-streams.md": "8f3432ba2bbb6a845636d5be802a5ef5db7cc410efdef0f8a72742ebd41ae5d2",
+      "packages/vega-event-selector/src/event-selector.js": "f071d2bcbd1398a9812f418cd0571cc64dc77ef0c0674010f460ac13b6f7bd77"
+    },
+    "generatedBy": "scripts/extract_catalog.py",
+    "notes": [
+      "`markTypes` and the selector tokens come from the parser (vega-event-selector); event types, named sources and object properties come from the doc page.",
+      "`markEventTypes` applies only to events on scenegraph items (marks, view, scope). Other DOM sources (`window`, a CSS selector) accept any event type the browser fires.",
+      "Every example's `parsed` is the output of the Python port of the parser in scripts/vega_language.py."
+    ]
+  },
+  "generalForm": "(source:)?type([filter])*({throttle(,debounce)?})?",
+  "defaultSource": "view",
+  "namedSources": [
+    "*",
+    "view",
+    "scope",
+    "window",
+    "container"
+  ],
+  "markTypes": [
+    "*",
+    "arc",
+    "area",
+    "group",
+    "image",
+    "line",
+    "path",
+    "rect",
+    "rule",
+    "shape",
+    "symbol",
+    "text",
+    "trail"
+  ],
+  "markEventTypes": [
+    "click",
+    "dblclick",
+    "dragenter",
+    "dragleave",
+    "dragover",
+    "keydown",
+    "keypress",
+    "keyup",
+    "mousedown",
+    "mousemove",
+    "mouseout",
+    "mouseover",
+    "mouseup",
+    "mousewheel",
+    "touchend",
+    "touchmove",
+    "touchstart",
+    "wheel"
+  ],
+  "specialEventTypes": [
+    {
+      "type": "timer",
+      "note": "fires every `throttle` milliseconds; source ignored"
+    },
+    {
+      "type": "resize",
+      "source": "container",
+      "since": "6.4"
+    }
+  ],
+  "syntax": {
+    "merge": ",",
+    "sourceSeparator": ":",
+    "markname": "@",
+    "filter": "[expression]",
+    "between": "[start, stop] > stream",
+    "timing": "{throttle,debounce}",
+    "consume": "!"
+  },
+  "parserFields": [
+    "source",
+    "between",
+    "type",
+    "markname",
+    "marktype",
+    "consume",
+    "filter",
+    "throttle",
+    "debounce",
+    "stream"
+  ],
+  "objectProperties": [
+    {
+      "name": "source",
+      "required": false,
+      "type": "String",
+      "description": "The input event source. For event streams defined in the top-level scope of a Vega specification, this property defaults to `\"view\"`, which monitors all input events in the current Vega view component (including those targeting the containing Canvas or SVG component itself). For event streams defined within nested scopes, this property defaults to `\"scope\"`, which limits consideration to only events originating within the group in which the event stream is defined. Othe legal values include `\"window\"` for the browser window object, `\"container\"` for the DOM element containing the view (`\"resize\"` events only), or a [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) string indicating external DOM elements. The source property is ignored if the event _type_ is `\"timer\"`."
+    },
+    {
+      "name": "type",
+      "required": true,
+      "type": "String",
+      "description": "The event type to monitor (e.g., `\"click\"`, `\"keydown\"`, `\"timer\"`). For more, see the [supported event types list](https://vega.github.io/vega/docs/event-streams/#types)."
+    },
+    {
+      "name": "between",
+      "required": false,
+      "type": "[EventStream](https://vega.github.io/vega/docs/event-streams/#object)[]",
+      "description": "A two-element array of event stream objects, indicating sentinel starting and ending events. Only events that occur between these two events will be captured."
+    },
+    {
+      "name": "consume",
+      "required": false,
+      "type": "Boolean",
+      "description": "A boolean flag (default `false`) indicating if this stream should consume the event by invoking [`event.preventDefault()`](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault). To control event consumption more globally, see the [event handling configuration](https://vega.github.io/vega/docs/config/#events)."
+    },
+    {
+      "name": "filter",
+      "required": false,
+      "type": "[Expression](https://vega.github.io/vega/docs/expressions) | [Expression](https://vega.github.io/vega/docs/expressions)[]",
+      "description": "One or more filter expressions, each of which must evaluate to a truthy value in order for the event to be captured. These expressions may **not** reference signal values, only event properties."
+    },
+    {
+      "name": "debounce",
+      "required": false,
+      "type": "Number",
+      "description": "The minimum time to wait between event occurrence and processing. If a new event arrives during a debouncing window, the debounce timer will restart and only the new event will be captured."
+    },
+    {
+      "name": "markname",
+      "required": false,
+      "type": "String",
+      "description": "The unique name of a mark set for which to monitor input events. Events originating from other marks will be ignored."
+    },
+    {
+      "name": "marktype",
+      "required": false,
+      "type": "String",
+      "description": "The type or marks (`arc`, `rect`, _etc._) to monitor for input events. Events originating from other mark types will be ignored."
+    },
+    {
+      "name": "throttle",
+      "required": false,
+      "type": "Number",
+      "description": "The minimum time in milliseconds between captured events (default `0`). New events that arrive within the throttling window will be ignored. For timer events, this property determines the interval between timer ticks."
+    },
+    {
+      "name": "stream",
+      "required": true,
+      "type": "[EventStream](https://vega.github.io/vega/docs/event-streams/#object)",
+      "description": "An input event stream to modify with additional parameters."
+    },
+    {
+      "name": "merge",
+      "required": true,
+      "type": "[EventStream](https://vega.github.io/vega/docs/event-streams/#object)[]",
+      "description": "An array of event streams to merge into a single stream."
+    }
+  ],
+  "references": [
+    {
+      "name": "Signal",
+      "key": "signal"
+    },
+    {
+      "name": "Scale",
+      "key": "scale"
+    }
+  ],
+  "examples": [
+    {
+      "selector": "mousedown",
+      "comment": "capture all mousedown events, regardless of source",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousedown"
+        }
+      ]
+    },
+    {
+      "selector": "*:mousedown",
+      "comment": "mousedown events on marks, but not the view itself",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousedown",
+          "marktype": "*"
+        }
+      ]
+    },
+    {
+      "selector": "rect:mousedown",
+      "comment": "mousedown events on any rect marks",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousedown",
+          "marktype": "rect"
+        }
+      ]
+    },
+    {
+      "selector": "@foo:mousedown",
+      "comment": "mousedown events on marks named 'foo'",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousedown",
+          "markname": "foo"
+        }
+      ]
+    },
+    {
+      "selector": "symbol:mousedown!",
+      "comment": "capture and consume mousedown events on symbol marks",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousedown",
+          "marktype": "symbol",
+          "consume": true
+        }
+      ]
+    },
+    {
+      "selector": "window:mousemove",
+      "comment": "capture mousemove events from the browser window",
+      "parsed": [
+        {
+          "source": "window",
+          "type": "mousemove"
+        }
+      ]
+    },
+    {
+      "selector": "container:resize",
+      "comment": "capture size changes of the view container element",
+      "parsed": [
+        {
+          "source": "container",
+          "type": "resize"
+        }
+      ]
+    },
+    {
+      "selector": "mousemove{100}",
+      "comment": "throttle the stream by 100 ms",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousemove",
+          "throttle": 100
+        }
+      ]
+    },
+    {
+      "selector": "mousemove{100, 200}",
+      "comment": "also debounce the stream by 200 ms",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousemove",
+          "throttle": 100,
+          "debounce": 200
+        }
+      ]
+    },
+    {
+      "selector": "mousemove{0, 200}",
+      "comment": "debounce by 200 ms, but do not throttle",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousemove",
+          "debounce": 200
+        }
+      ]
+    },
+    {
+      "selector": "timer{1000}",
+      "comment": "capture a timer tick every 1000 ms",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "timer",
+          "throttle": 1000
+        }
+      ]
+    },
+    {
+      "selector": "mousemove[event.buttons]",
+      "comment": "mousemove events with any mouse button pressed",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousemove",
+          "filter": [
+            "event.buttons"
+          ]
+        }
+      ]
+    },
+    {
+      "selector": "click[event.shiftKey]",
+      "comment": "click events with the shift key pressed",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "click",
+          "filter": [
+            "event.shiftKey"
+          ]
+        }
+      ]
+    },
+    {
+      "selector": "path:mousedown, path:touchstart",
+      "comment": "",
+      "parsed": [
+        {
+          "source": "view",
+          "type": "mousedown",
+          "marktype": "path"
+        },
+        {
+          "source": "view",
+          "type": "touchstart",
+          "marktype": "path"
+        }
+      ]
+    },
+    {
+      "selector": "[rect:mousedown, window:mouseup] > window:mousemove",
+      "comment": "",
+      "parsed": [
+        {
+          "source": "window",
+          "type": "mousemove",
+          "between": [
+            {
+              "source": "view",
+              "type": "mousedown",
+              "marktype": "rect"
+            },
+            {
+              "source": "window",
+              "type": "mouseup"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

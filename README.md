@@ -30,12 +30,34 @@ anything an agent reads (a card, or an example spec) uses a mark, channel, trans
 projection type or structural property that is **not in the schema**. That is "no invented name",
 applied to Vega and Vega-Lite.
 
+## Expressions and event streams (Vega 6)
+
+The schema types an expression (`"update": "…"`) and an event selector (`"events": "…"`) as free
+strings, so neither vocabulary can come from it. They come from the Vega source itself, pinned at
+**Vega 6.4.0** under [`sources/vega-6.4.0/`](sources/vega-6.4.0/) with a SHA-256 per file
+([`scripts/vega_sources.py`](scripts/vega_sources.py)):
+
+| Catalogue | Extracted from | Cards |
+|---|---|---|
+| [`vega-v6.expressions.catalog.json`](exports/vega-v6.expressions.catalog.json) | the function registry of `vega-functions` and `vega-expression`, plus the signatures and categories of the expressions doc page | [`reference/vega/expressions/`](reference/vega/expressions/README.md), one per category |
+| [`vega-v6.event-streams.catalog.json`](exports/vega-v6.event-streams.catalog.json) | the `vega-event-selector` parser and the event streams doc page | [`reference/vega/event-streams.md`](reference/vega/event-streams.md) |
+
+The cards are generated from the catalogues, never written by hand. `Validate` fails if a vendored
+file no longer matches its pin, if a catalogue or a card is out of sync with the pinned source, if
+an example spec or a card calls an expression function that Vega does not have, or if an event
+selector does not parse or names an event or mark type Vega does not fire. Vega-Lite expressions
+compile to Vega expressions, so the same function list applies to them.
+
+The vendored Vega files are © the University of Washington Interactive Data Lab, under their
+[BSD-3-Clause license](sources/vega-6.4.0/LICENSE).
+
 ## What it will contain
 
 | Piece | Source | Status |
 |---|---|---|
 | Name catalogues (Vega-Lite + Vega) | the two official JSON Schemas | done |
 | Schema-backed name check in CI | `scripts/check_repo.py` | done |
+| Expression functions + event-stream grammar (Vega 6) and their cards | the pinned Vega 6.4.0 source | done |
 | Trap notes + validated examples | drafted by a model, every name checked against the schema | drafting |
 | Reference cards and a plugin | promoted from the drafts | planned |
 | `vega-feedback` skill | report a wrong or missing card as a public issue | planned |

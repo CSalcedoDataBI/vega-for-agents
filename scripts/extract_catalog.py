@@ -1,12 +1,17 @@
-"""Extract the catalogue of valid names from the official Vega / Vega-Lite JSON Schemas.
+"""Extract the catalogue of valid names from the official Vega / Vega-Lite sources.
 
-The schemas under exports/ are the source of truth. This script reads them and writes, for each
-language, exports/<name>.catalog.json: the closed vocabularies an agent must not invent (marks,
-encoding channels, transforms, scale types) and the full set of structural property names. The
-exact schema is pinned by SHA-256 in each catalogue's `meta`.
+The schemas under exports/ are the source of truth for spec structure. This script reads them and
+writes, for each language, exports/<name>.catalog.json: the closed vocabularies an agent must not
+invent (marks, encoding channels, transforms, scale types) and the full set of structural property
+names. The exact schema is pinned by SHA-256 in each catalogue's `meta`.
 
-    python scripts/extract_catalog.py            # (re)write the catalogues
-    python scripts/extract_catalog.py --check     # fail if a catalogue is out of sync with its schema
+The expression language and the event-stream grammar are in no schema (both are free strings
+there), so they come from the Vega 6 source files pinned in scripts/vega_sources.py:
+exports/vega-v6.expressions.catalog.json, exports/vega-v6.event-streams.catalog.json, and the
+reference cards under reference/vega/, rendered from those two catalogues.
+
+    python scripts/extract_catalog.py            # (re)write the catalogues and the cards
+    python scripts/extract_catalog.py --check     # fail if anything is out of sync with its source
 
 Standard library only, so CI needs no install step.
 """
@@ -19,8 +24,21 @@ import json
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import vega_cards  # noqa: E402
+import vega_language  # noqa: E402
+import vega_sources  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 EXPORTS = ROOT / "exports"
+CARDS = ROOT / "reference" / "vega"
+
+# Catalogues extracted from the pinned Vega source instead of a schema.
+SOURCE_CATALOGS = {
+    "vega-expressions": "vega-v6.expressions.catalog.json",
+    "vega-event-streams": "vega-v6.event-streams.catalog.json",
+}
 
 SCHEMAS = {
     "vega-lite": {
@@ -171,35 +189,69 @@ def build_all() -> dict[str, dict]:
     return {
         "vega-lite": build_catalog("vega-lite"),
         "vega": build_catalog("vega", marktypes),
+        "vega-expressions": vega_language.expressions_catalog(),
+        "vega-event-streams": vega_language.event_streams_catalog(),
     }
+
+
+def catalog_path(language: str) -> Path:
+    if language in SOURCE_CATALOGS:
+        return EXPORTS / SOURCE_CATALOGS[language]
+    return EXPORTS / SCHEMAS[language]["catalog"]
+
+
+def build_cards(catalogs: dict[str, dict]) -> dict[str, str]:
+    """The reference cards (repo-relative path -> text), rendered from the catalogues only."""
+    return {**vega_cards.expression_cards(catalogs["vega-expressions"]),
+            **vega_cards.event_stream_card(catalogs["vega-event-streams"])}
 
 
 def write_all(catalogs: dict[str, dict]) -> None:
     for language, catalog in catalogs.items():
-        path = EXPORTS / SCHEMAS[language]["catalog"]
-        path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        text = json.dumps(catalog, indent=2, ensure_ascii=False) + "\n"
+        catalog_path(language).write_bytes(text.encode("utf-8"))
+    cards = build_cards(catalogs)
+    for stale in CARDS.glob("**/*.md"):
+        if stale.relative_to(ROOT).as_posix() not in cards:
+            stale.unlink()
+    for rel, text in cards.items():
+        path = ROOT / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(text.encode("utf-8"))
 
 
 def check_all(catalogs: dict[str, dict]) -> list[str]:
-    errors = []
+    errors = list(vega_sources.verify())
     for language, catalog in catalogs.items():
-        path = EXPORTS / SCHEMAS[language]["catalog"]
+        path = catalog_path(language)
+        source = (SCHEMAS[language]["schema"] if language in SCHEMAS
+                  else f"the pinned Vega {vega_sources.VERSION} source")
         if not path.exists():
             errors.append(f"{path.name}: catalogue missing; run scripts/extract_catalog.py")
             continue
         on_disk = json.loads(path.read_text(encoding="utf-8"))
         if on_disk != catalog:
-            errors.append(
-                f"{path.name}: out of sync with {SCHEMAS[language]['schema']}; "
-                f"run scripts/extract_catalog.py"
-            )
+            errors.append(f"{path.name}: out of sync with {source}; run scripts/extract_catalog.py")
+    cards = build_cards(catalogs)
+    for rel, text in cards.items():
+        path = ROOT / rel
+        if not path.exists():
+            errors.append(f"{rel}: card missing; run scripts/extract_catalog.py")
+        elif path.read_bytes().decode("utf-8").replace("\r\n", "\n") != text:
+            errors.append(f"{rel}: card out of sync with its catalogue; run "
+                          f"scripts/extract_catalog.py (cards are never edited by hand)")
+    for extra in sorted(CARDS.glob("**/*.md")):
+        rel = extra.relative_to(ROOT).as_posix()
+        if rel not in cards:
+            errors.append(f"{rel}: not generated from any catalogue; remove it")
     return errors
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="Extract Vega / Vega-Lite name catalogues from schemas.")
+    ap = argparse.ArgumentParser(description="Extract Vega / Vega-Lite name catalogues.")
     ap.add_argument("--check", action="store_true",
-                    help="fail if a catalogue on disk differs from the schema, instead of writing")
+                    help="fail if a catalogue or card on disk differs from its source, "
+                         "instead of writing")
     args = ap.parse_args(argv)
     catalogs = build_all()
     if args.check:
@@ -207,12 +259,18 @@ def main(argv=None) -> int:
         for error in errors:
             print(f"FAIL {error}")
         if not errors:
-            print("OK catalogues in sync with schemas")
+            print("OK catalogues and cards in sync with their sources")
         return 1 if errors else 0
+    pins = vega_sources.verify()
+    if pins:
+        for error in pins:
+            print(f"FAIL {error}")
+        return 1
     write_all(catalogs)
     for language, catalog in catalogs.items():
         counts = {k: len(v) for k, v in catalog.items() if isinstance(v, list)}
-        print(f"wrote {SCHEMAS[language]['catalog']}: {counts}")
+        print(f"wrote {catalog_path(language).name}: {counts}")
+    print(f"wrote {len(build_cards(catalogs))} cards under reference/vega/")
     return 0
 
 
