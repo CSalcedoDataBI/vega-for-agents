@@ -1,5 +1,6 @@
 {
   "meta": {
+    "contract": "1.0.0",
     "language": "vega-lite",
     "schemaVersion": "v5",
     "schemaFile": "vega-lite-v5.schema.json",

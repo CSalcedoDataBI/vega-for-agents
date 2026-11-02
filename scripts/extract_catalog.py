@@ -15,6 +15,10 @@ there), so they come from the Vega 6 source files pinned in scripts/vega_sources
 exports/vega-v6.expressions.catalog.json, exports/vega-v6.event-streams.catalog.json, and the
 reference cards under reference/vega/, rendered from those two catalogues.
 
+Every catalogue carries `meta.contract`, the semver of the catalogue format (CONTRACT_VERSION).
+After writing the catalogues the script writes exports/manifest.json, one entry per exported file
+with its SHA-256, so consumers can copy the directory at a release tag and verify it.
+
     python scripts/extract_catalog.py            # (re)write the catalogues, the diff and the cards
     python scripts/extract_catalog.py --check     # fail if anything is out of sync with its source
 
@@ -26,6 +30,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -37,8 +42,19 @@ import vega_sources  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 EXPORTS = ROOT / "exports"
+MANIFEST = EXPORTS / "manifest.json"
 CARDS = ROOT / "reference" / "vega"
 DIFF_REPORT = ROOT / "reference" / "schema-diff-v5-v6.md"
+
+# The semver of the catalogue *format*, independent of the Vega / Vega-Lite versions a catalogue
+# describes. Bump it in the same change as the extractor:
+#   patch: no change for readers (a typo, a regenerated value with the same keys and types);
+#   minor: a new optional key, which an existing reader can ignore;
+#   major: a key removed or renamed, or a type changed.
+CONTRACT_VERSION = "1.0.0"
+REPOSITORY = "CSalcedoDataBI/vega-for-agents"
+# A pinned schema file, e.g. vega-lite-v6.schema.json.
+SCHEMA_FILE = re.compile(r"^(vega-lite|vega)-v(\d+)\.schema\.json$")
 
 # Catalogues extracted from the pinned Vega source instead of a schema.
 SOURCE_CATALOGS = {
@@ -88,6 +104,22 @@ SCHEMAS = {
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def catalog_text(catalog: dict) -> str:
+    """The exact bytes the extractor writes for a catalogue (insertion order, trailing newline)."""
+    return json.dumps(catalog, indent=2, ensure_ascii=False) + "\n"
+
+
+def manifest_text(manifest: dict) -> str:
+    """The exact bytes of the manifest: sorted keys, files already in path order, no timestamps."""
+    return json.dumps(manifest, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+
+
+def with_contract(catalog: dict) -> dict:
+    """Tag a catalogue with the format contract, first in `meta` so every file reads the same."""
+    catalog["meta"] = {"contract": CONTRACT_VERSION, **catalog["meta"]}
+    return catalog
 
 
 def all_property_names(schema: dict) -> set[str]:
@@ -233,7 +265,7 @@ def build_catalog(language: str, vega_lite_marktypes: list[str] | None = None) -
                 next(key for key, other in SCHEMAS.items()
                      if other["language"] == "vega-lite" and other["version"] == cfg["version"]))
         body = extract_vega(schema, vega_lite_marktypes)
-    return {"meta": meta, **body}
+    return with_contract({"meta": meta, **body})
 
 
 def marktypes_from_vega_lite(language: str = "vega-lite-v6") -> list[str]:
@@ -250,8 +282,8 @@ def build_all() -> dict[str, dict]:
     catalogs = {}
     for language, cfg in SCHEMAS.items():
         catalogs[language] = build_catalog(language, marktypes[cfg["version"]])
-    catalogs["vega-expressions"] = vega_language.expressions_catalog()
-    catalogs["vega-event-streams"] = vega_language.event_streams_catalog()
+    catalogs["vega-expressions"] = with_contract(vega_language.expressions_catalog())
+    catalogs["vega-event-streams"] = with_contract(vega_language.event_streams_catalog())
     return catalogs
 
 
@@ -259,6 +291,104 @@ def catalog_path(language: str) -> Path:
     if language in SOURCE_CATALOGS:
         return EXPORTS / SOURCE_CATALOGS[language]
     return EXPORTS / SCHEMAS[language]["catalog"]
+
+
+def catalog_version(catalog: dict) -> str:
+    """The major version a catalogue describes (`v6`), from what its `meta` already records."""
+    meta = catalog.get("meta", {})
+    version = meta.get("schemaVersion")
+    if not version and meta.get("vegaVersion"):
+        version = "v" + str(meta["vegaVersion"]).split(".", 1)[0]
+    return version or ""
+
+
+def catalog_source(catalog: dict) -> dict:
+    """The provenance recorded in `meta`, never a version the extractor does not know."""
+    meta = catalog.get("meta", {})
+    if meta.get("package"):
+        source = {"package": meta["package"]}
+        if meta.get("exactVersion"):
+            source["version"] = meta["exactVersion"]
+        return source
+    if meta.get("vegaVersion") and meta.get("commit"):
+        # The expression and event-stream catalogues come from the pinned Vega source tree.
+        return {"version": meta["vegaVersion"], "commit": meta["commit"]}
+    return {}
+
+
+def catalog_entry(language: str, catalog: dict) -> dict:
+    meta = catalog.get("meta", {})
+    entry = {
+        "path": catalog_path(language).relative_to(ROOT).as_posix(),
+        "kind": "catalog",
+        "language": meta.get("language", ""),
+        "version": catalog_version(catalog),
+        "contract": meta.get("contract", CONTRACT_VERSION),
+        "sha256": hashlib.sha256(catalog_text(catalog).encode("utf-8")).hexdigest(),
+    }
+    source = catalog_source(catalog)
+    if source:
+        entry["source"] = source
+    return entry
+
+
+def schema_entry(path: Path) -> dict:
+    entry = {
+        "path": path.relative_to(ROOT).as_posix(),
+        "kind": "schema",
+        "sha256": sha256(path),
+    }
+    match = SCHEMA_FILE.match(path.name)
+    if match:
+        entry["language"] = match.group(1)
+        entry["version"] = f"v{match.group(2)}"
+    return entry
+
+
+def build_manifest(catalogs: dict[str, dict]) -> dict:
+    """The manifest of every catalogue and schema, in path order, with no timestamp."""
+    files = [catalog_entry(language, catalog) for language, catalog in catalogs.items()]
+    files += [schema_entry(path) for path in EXPORTS.glob("*.schema.json")]
+    files.sort(key=lambda entry: entry["path"])
+    return {"repository": REPOSITORY, "contract": CONTRACT_VERSION, "files": files}
+
+
+def check_manifest(catalogs: dict[str, dict]) -> list[str]:
+    """The manifest must exist, match the generated one byte for byte, and match each file."""
+    rel = MANIFEST.relative_to(ROOT).as_posix()
+    if not MANIFEST.exists():
+        return [f"{rel}: manifest missing; run scripts/extract_catalog.py"]
+    try:
+        on_disk = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return [f"{rel}: not valid JSON ({exc}); run scripts/extract_catalog.py"]
+    expected = build_manifest(catalogs)
+    errors = []
+    if on_disk != expected:
+        errors.append(f"{rel}: out of sync with the catalogues and schemas; run "
+                      f"scripts/extract_catalog.py")
+    elif MANIFEST.read_text(encoding="utf-8").replace("\r\n", "\n") != manifest_text(expected):
+        errors.append(f"{rel}: not in canonical form (sorted keys, trailing newline); run "
+                      f"scripts/extract_catalog.py")
+    files = on_disk.get("files", []) if isinstance(on_disk, dict) else []
+    if not isinstance(files, list):
+        files = []
+    listed = {entry["path"] for entry in files
+              if isinstance(entry, dict) and isinstance(entry.get("path"), str)}
+    actual = {path.relative_to(ROOT).as_posix()
+              for path in EXPORTS.iterdir() if path.is_file() and path != MANIFEST}
+    for path in sorted(listed - actual):
+        errors.append(f"{path}: listed in {rel} but missing from exports/")
+    for path in sorted(actual - listed):
+        errors.append(f"{path}: present under exports/ but not listed in {rel}")
+    for entry in files:
+        if not isinstance(entry, dict) or entry.get("path") not in actual:
+            continue
+        path = ROOT / entry["path"]
+        if entry.get("sha256") != sha256(path):
+            errors.append(f"{rel}: sha256 for {entry['path']} does not match the file; run "
+                          f"scripts/extract_catalog.py")
+    return errors
 
 
 # (catalogue key, report heading). The order is fixed so the report is deterministic.
@@ -324,8 +454,10 @@ def build_cards(catalogs: dict[str, dict]) -> dict[str, str]:
 
 def write_all(catalogs: dict[str, dict]) -> None:
     for language, catalog in catalogs.items():
-        text = json.dumps(catalog, indent=2, ensure_ascii=False) + "\n"
-        catalog_path(language).write_bytes(text.encode("utf-8"))
+        with_contract(catalog)
+        catalog_path(language).write_bytes(catalog_text(catalog).encode("utf-8"))
+    # After the catalogues: one entry per exported file, with the hash of the bytes just written.
+    MANIFEST.write_bytes(manifest_text(build_manifest(catalogs)).encode("utf-8"))
     DIFF_REPORT.parent.mkdir(parents=True, exist_ok=True)
     DIFF_REPORT.write_bytes(diff_report(catalogs).encode("utf-8"))
     cards = build_cards(catalogs)
@@ -344,12 +476,27 @@ def check_all(catalogs: dict[str, dict]) -> list[str]:
         path = catalog_path(language)
         source = (SCHEMAS[language]["schema"] if language in SCHEMAS
                   else f"the pinned Vega {vega_sources.VERSION} source")
+        meta = catalog.get("meta")
+        if not isinstance(meta, dict) or "contract" not in meta:
+            errors.append(f"{path.name}: meta.contract is missing from the generated catalogue; "
+                          f"run scripts/extract_catalog.py")
         if not path.exists():
             errors.append(f"{path.name}: catalogue missing; run scripts/extract_catalog.py")
             continue
-        on_disk = json.loads(path.read_text(encoding="utf-8"))
-        if on_disk != catalog:
+        data = path.read_bytes()
+        if data != catalog_text(catalog).encode("utf-8"):
+            # Byte-for-byte, so even a change JSON would normalise away fails the check.
             errors.append(f"{path.name}: out of sync with {source}; run scripts/extract_catalog.py")
+        try:
+            on_disk = json.loads(data.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            on_disk = None
+        meta = on_disk.get("meta") if isinstance(on_disk, dict) else None
+        if not isinstance(meta, dict) or "contract" not in meta:
+            errors.append(f"{path.name}: meta.contract is missing; run scripts/extract_catalog.py")
+        elif meta["contract"] != CONTRACT_VERSION:
+            errors.append(f"{path.name}: meta.contract is {meta['contract']!r}, expected "
+                          f"{CONTRACT_VERSION!r}; run scripts/extract_catalog.py")
     report_rel = DIFF_REPORT.relative_to(ROOT).as_posix()
     if not DIFF_REPORT.exists():
         errors.append(f"{report_rel}: diff report missing; run scripts/extract_catalog.py")
@@ -367,14 +514,15 @@ def check_all(catalogs: dict[str, dict]) -> list[str]:
         rel = extra.relative_to(ROOT).as_posix()
         if rel not in cards:
             errors.append(f"{rel}: not generated from any catalogue; remove it")
+    errors += check_manifest(catalogs)
     return errors
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Extract Vega / Vega-Lite name catalogues.")
     ap.add_argument("--check", action="store_true",
-                    help="fail if a catalogue or card on disk differs from its source, "
-                         "instead of writing")
+                    help="fail if a catalogue, card or the manifest on disk differs from its "
+                         "source, instead of writing")
     args = ap.parse_args(argv)
     catalogs = build_all()
     if args.check:
@@ -382,7 +530,7 @@ def main(argv=None) -> int:
         for error in errors:
             print(f"FAIL {error}")
         if not errors:
-            print("OK catalogues and cards in sync with their sources")
+            print("OK catalogues, cards and manifest in sync with their sources")
         return 1 if errors else 0
     pins = vega_sources.verify()
     if pins:
@@ -395,6 +543,7 @@ def main(argv=None) -> int:
         print(f"wrote {catalog_path(language).name}: {counts}")
     print(f"wrote {DIFF_REPORT.relative_to(ROOT).as_posix()}")
     print(f"wrote {len(build_cards(catalogs))} cards under reference/vega/")
+    print(f"wrote {MANIFEST.relative_to(ROOT).as_posix()}")
     return 0
 
 

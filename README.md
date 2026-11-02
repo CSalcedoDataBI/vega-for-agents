@@ -78,6 +78,19 @@ SHA-256 in each catalogue's `meta` block. The v6 catalogues also record `exactVe
 Vega-Lite 6.4.3); the v5 catalogues are kept as they were, without inventing a release number.
 Changing a schema is a new extraction, never a hand edit.
 
+## Using the catalogues as data
+
+To consume the catalogues as data, pin a release tag `vX.Y.Z` instead of following `main`, copy
+`exports/` from that tag, and verify every file listed in `exports/manifest.json`. The manifest names
+the repository, the catalogue format version (`contract`) and one entry per exported file with its
+`kind`, `language`, `version`, `sha256` and — for a catalogue — the `contract` it declares and the
+`source` it was extracted from. Check each listed file's SHA-256 before reading it, then read
+`meta.contract` in the catalogue to know which format version you have.
+
+The contract version is independent of the Vega and Vega-Lite versions in `meta`: a patch release
+does not change what a reader sees, a minor release only adds optional keys, and a major release
+removes or renames a key or changes a type.
+
 ## Not in scope
 
 - The craft of authoring Deneb visuals for Power BI (`pbiFormat`, templates, cross-filter). That

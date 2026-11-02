@@ -48,6 +48,19 @@ The structural catalogues are pinned per major version. To pin a new one:
 5. Run `python scripts/extract_catalog.py --check` and `python scripts/check_repo.py`, then the
    tests. The extractor writes the schema's SHA-256 into the catalogue `meta` from the file itself.
 
+## The catalogue format contract
+
+Every catalogue carries `meta.contract`: the semver of the catalogue **format**, set by
+`CONTRACT_VERSION` in `scripts/extract_catalog.py`. `exports/manifest.json` records the same
+version and the SHA-256 of every exported file. Change the contract when the shape of a catalogue
+changes, and bump `CONTRACT_VERSION` in the same pull request:
+
+- **patch** — no change for readers: a typo, or a regenerated value that keeps every key and type;
+- **minor** — a new optional key that an existing reader can ignore;
+- **major** — a key removed or renamed, or a type changed.
+
+Never edit a catalogue or the manifest by hand: run `python scripts/extract_catalog.py`.
+
 ## License
 
 By contributing, you agree that your contribution is licensed under the [MIT License](LICENSE).
