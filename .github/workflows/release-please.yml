@@ -1,0 +1,39 @@
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  # For `gh workflow run` on the release branch (last step).
+  actions: write
+
+# R2, with the standard's exception: cancel-in-progress is FALSE. A release cancelled halfway
+# leaves tags and PRs out of step, which costs more than the minute it saves.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    # R3: the action reads commits and updates one PR, well under a minute.
+    timeout-minutes: 10
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # The release PR is pushed by a bot, so its pull_request runs wait for a manual approval and
+      # the required `Validate` check never reports. workflow_dispatch is exempt from that rule:
+      # ask for the verdict here, by name, on the release branch.
+      - name: Ask Validate for a verdict on the release branch
+        if: steps.release.outputs.pr != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ fromJSON(steps.release.outputs.pr || '{}').headBranchName }}
+        run: gh workflow run validate.yml --ref "$BRANCH"
