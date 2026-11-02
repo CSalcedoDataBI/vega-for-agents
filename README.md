@@ -67,7 +67,7 @@ The vendored Vega files are © the University of Washington Interactive Data Lab
 | Name catalogues (Vega-Lite + Vega, v5 and v6) | the official JSON Schemas | done |
 | Schema-backed name check in CI | `scripts/check_repo.py` | done |
 | Expression functions + event-stream grammar (Vega 6) and their cards | the pinned Vega 6.4.0 source | done |
-| Trap notes + validated examples | drafted by a model, every name checked against the schema | drafting |
+| [Trap notes + validated examples](reference/drafts/README.md) | drafted by a model, every name checked against the schema | drafting |
 | Reference cards and a plugin | promoted from the drafts | planned |
 | `vega-feedback` skill | report a wrong or missing card as a public issue | planned |
 
