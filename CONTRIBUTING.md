@@ -9,6 +9,11 @@ wrong, missing or catalogued under the wrong language, include:
 - the name and what the catalogue says about it;
 - a minimal spec and what the Vega/Vega-Lite compiler did with it.
 
+With the plugin installed, the `vega-feedback` skill collects the same evidence — a minimal
+standalone spec with inline data, the renderer and version, what the plugin says and what the
+engine did — rewrites anything project-specific, shows you the full text, and files a public issue
+only after you approve it. Without the plugin, open the issue directly with that evidence.
+
 ## Changes go through a pull request
 
 Every change to `main` comes in through a pull request, and the required `Validate` check must pass
@@ -47,6 +52,19 @@ The structural catalogues are pinned per major version. To pin a new one:
    `reference/schema-diff-v5-v6.md` and the cards; never edit those files by hand.
 5. Run `python scripts/extract_catalog.py --check` and `python scripts/check_repo.py`, then the
    tests. The extractor writes the schema's SHA-256 into the catalogue `meta` from the file itself.
+
+## The catalogue format contract
+
+Every catalogue carries `meta.contract`: the semver of the catalogue **format**, set by
+`CONTRACT_VERSION` in `scripts/extract_catalog.py`. `exports/manifest.json` records the same
+version and the SHA-256 of every exported file. Change the contract when the shape of a catalogue
+changes, and bump `CONTRACT_VERSION` in the same pull request:
+
+- **patch** — no change for readers: a typo, or a regenerated value that keeps every key and type;
+- **minor** — a new optional key that an existing reader can ignore;
+- **major** — a key removed or renamed, or a type changed.
+
+Never edit a catalogue or the manifest by hand: run `python scripts/extract_catalog.py`.
 
 ## License
 

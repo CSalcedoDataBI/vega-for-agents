@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "vega-for-agents",
+  "description": "The Vega and Vega-Lite language reference for AI agents, built from the official JSON Schemas.",
+  "owner": {
+    "name": "Cristóbal Salcedo",
+    "email": "contacto@csalcedodatabi.com",
+    "url": "https://csalcedodatabi.com"
+  },
+  "plugins": [
+    {
+      "name": "vega-for-agents",
+      "source": "./",
+      "description": "The Vega and Vega-Lite language reference for AI agents: marks, encoding channels, transforms, scales, projections and properties extracted from the official JSON Schemas, plus a sanitized path for reporting a wrong or missing name. Not Power BI or Deneb authoring."
+    }
+  ]
+}

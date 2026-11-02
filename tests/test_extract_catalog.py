@@ -1,5 +1,7 @@
 """Tests for scripts/extract_catalog.py: the catalogues match the schemas on disk."""
 
+import hashlib
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -104,6 +106,80 @@ class TestExtract(unittest.TestCase):
             self.assertEqual(meta["commit"], vs.COMMIT)
             for path, sha in meta["files"].items():
                 self.assertEqual(sha, vs.FILES[path])
+
+
+class TestContractAndManifest(unittest.TestCase):
+    def setUp(self):
+        self.catalogs = ec.build_all()
+
+    def test_every_catalogue_has_the_contract(self):
+        for key, catalog in self.catalogs.items():
+            self.assertEqual(catalog["meta"]["contract"], ec.CONTRACT_VERSION, key)
+
+    def test_manifest_lists_every_exports_file_with_its_real_sha256(self):
+        manifest = ec.build_manifest(self.catalogs)
+        listed = {entry["path"] for entry in manifest["files"]}
+        actual = {path.relative_to(ec.ROOT).as_posix()
+                  for path in ec.EXPORTS.iterdir()
+                  if path.is_file() and path != ec.MANIFEST}
+        self.assertEqual(listed, actual)
+        for entry in manifest["files"]:
+            path = ec.ROOT / entry["path"]
+            self.assertEqual(entry["sha256"],
+                             hashlib.sha256(path.read_bytes()).hexdigest(), entry["path"])
+
+    def test_manifest_records_what_the_catalogue_meta_knows(self):
+        files = {entry["path"]: entry for entry in ec.build_manifest(self.catalogs)["files"]}
+        self.assertEqual(files["exports/vega-v6.catalog.json"]["source"],
+                         {"package": "vega", "version": "6.4.0"})
+        # The v5 catalogue has no pinned release, so its source has no version to invent.
+        self.assertEqual(files["exports/vega-lite-v5.catalog.json"]["source"],
+                         {"package": "vega-lite"})
+        expressions = files["exports/vega-v6.expressions.catalog.json"]
+        self.assertEqual(expressions["language"], "vega")
+        self.assertEqual(expressions["version"], "v6")
+        self.assertEqual(expressions["source"], {"version": vs.VERSION, "commit": vs.COMMIT})
+
+    def test_manifest_is_deterministic(self):
+        first = ec.build_manifest(self.catalogs)
+        second = ec.build_manifest(ec.build_all())
+        self.assertEqual(ec.manifest_text(first), ec.manifest_text(second))
+        self.assertTrue(ec.manifest_text(first).endswith("\n"))
+        self.assertEqual(json.loads(ec.manifest_text(first)), first)
+
+    def test_committed_manifest_is_in_sync(self):
+        self.assertEqual(ec.check_all(self.catalogs), [])
+
+    def test_missing_manifest_fails_check(self):
+        original = ec.MANIFEST.read_bytes()
+        try:
+            ec.MANIFEST.unlink()
+            errors = ec.check_all(self.catalogs)
+            self.assertTrue(any("manifest missing" in error for error in errors), errors)
+        finally:
+            ec.MANIFEST.write_bytes(original)
+
+    def test_edited_catalogue_byte_fails_check(self):
+        path = ec.catalog_path("vega-v6")
+        original = path.read_bytes()
+        try:
+            path.write_bytes(original + b" ")
+            errors = ec.check_all(self.catalogs)
+            self.assertTrue(any(path.name in error for error in errors), errors)
+        finally:
+            path.write_bytes(original)
+
+    def test_catalogue_without_contract_fails_check(self):
+        path = ec.catalog_path("vega-v6")
+        original = path.read_bytes()
+        try:
+            data = json.loads(original)
+            del data["meta"]["contract"]
+            path.write_bytes(ec.catalog_text(data).encode("utf-8"))
+            errors = ec.check_all(self.catalogs)
+            self.assertTrue(any("meta.contract" in error for error in errors), errors)
+        finally:
+            path.write_bytes(original)
 
 
 class TestVegaSources(unittest.TestCase):

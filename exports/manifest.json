@@ -1,0 +1,104 @@
+{
+  "contract": "1.0.0",
+  "files": [
+    {
+      "contract": "1.0.0",
+      "kind": "catalog",
+      "language": "vega-lite",
+      "path": "exports/vega-lite-v5.catalog.json",
+      "sha256": "2a61e2124f8de206a2152ef0c05e0c5b1c6776b33e7f878f725e4f3a1df312d9",
+      "source": {
+        "package": "vega-lite"
+      },
+      "version": "v5"
+    },
+    {
+      "kind": "schema",
+      "language": "vega-lite",
+      "path": "exports/vega-lite-v5.schema.json",
+      "sha256": "1aeeda8aa44dcce60f6b6fb7d8b650487e3e389a8284a2040e590be9a4c7610e",
+      "version": "v5"
+    },
+    {
+      "contract": "1.0.0",
+      "kind": "catalog",
+      "language": "vega-lite",
+      "path": "exports/vega-lite-v6.catalog.json",
+      "sha256": "47a703971e4e59a9e11f3e4da1ca9dce41308eb45d992cfc980710b4988b7623",
+      "source": {
+        "package": "vega-lite",
+        "version": "6.4.3"
+      },
+      "version": "v6"
+    },
+    {
+      "kind": "schema",
+      "language": "vega-lite",
+      "path": "exports/vega-lite-v6.schema.json",
+      "sha256": "4f11cd379b7cac0ddee17eefea84c028bd41619ace28778acf843c009e43abd2",
+      "version": "v6"
+    },
+    {
+      "contract": "1.0.0",
+      "kind": "catalog",
+      "language": "vega",
+      "path": "exports/vega-v5.catalog.json",
+      "sha256": "dd594fd1e619e7695a5f427d962281e01a617ae278dd2a1548f2389793180932",
+      "source": {
+        "package": "vega"
+      },
+      "version": "v5"
+    },
+    {
+      "kind": "schema",
+      "language": "vega",
+      "path": "exports/vega-v5.schema.json",
+      "sha256": "173a2d512cf0d8bc841bc90ce574f0526f710e4762820e6ca68bf86e35595920",
+      "version": "v5"
+    },
+    {
+      "contract": "1.0.0",
+      "kind": "catalog",
+      "language": "vega",
+      "path": "exports/vega-v6.catalog.json",
+      "sha256": "4666d04c6487807553bdf5e3c1d428ce909a45c958e62ae24ba2d7c7551322ed",
+      "source": {
+        "package": "vega",
+        "version": "6.4.0"
+      },
+      "version": "v6"
+    },
+    {
+      "contract": "1.0.0",
+      "kind": "catalog",
+      "language": "vega",
+      "path": "exports/vega-v6.event-streams.catalog.json",
+      "sha256": "c0328756c55219f949cf3f5313c45e015f542b9fdcc94127569d2c8b567a96b8",
+      "source": {
+        "commit": "adf0ae7cd5dbc5bd0d7b4fb5566a68adf14cac3f",
+        "version": "6.4.0"
+      },
+      "version": "v6"
+    },
+    {
+      "contract": "1.0.0",
+      "kind": "catalog",
+      "language": "vega",
+      "path": "exports/vega-v6.expressions.catalog.json",
+      "sha256": "9d5acbe8fb6612fd1374441c77accb46f35084b71ff8eefaa7ced4753772c0b6",
+      "source": {
+        "commit": "adf0ae7cd5dbc5bd0d7b4fb5566a68adf14cac3f",
+        "version": "6.4.0"
+      },
+      "version": "v6"
+    },
+    {
+      "kind": "schema",
+      "language": "vega",
+      "path": "exports/vega-v6.schema.json",
+      "sha256": "6fc0d0a574b26ebf650e94c6b25b60ef35a7bdc1f73f572ed74cfa7392901651",
+      "version": "v6"
+    }
+  ],
+  "repository": "CSalcedoDataBI/vega-for-agents"
+}
