@@ -32,7 +32,7 @@ The catalogue is a JSON object. These are its keys:
 
 | What you are checking | Vega-Lite | Vega |
 |---|---|---|
-| Mark (`mark`) | `marks` | `marks` |
+| Mark | `marks` (the `mark` value) | `marks` (the `marks[].type` value) |
 | Encoding channel (key under `encoding`) | `channels` | No encoding channels in Vega |
 | Transform | `transforms` | `transforms` |
 | Scale type (`scale.type`) | `scaleTypes` | `scaleTypes` |
@@ -43,23 +43,28 @@ Search the exact name under the key; do not read the whole catalogue and do not 
 from a nearby one. A name can be a valid property and still be invalid as a mark, channel,
 transform or scale type; the key decides the role. `$schema` is always accepted.
 
-If the catalogue has a `meta` block, `meta.schemaVersion` names the schema version and
-`meta.schemaSha256` is the SHA-256 of the schema it came from; use them to confirm the version.
+Every catalogue has a `meta` block; in the schema catalogues, `meta.schemaVersion` names the
+schema version and `meta.schemaSha256` is the SHA-256 of the schema it came from; use them to
+confirm the version.
 
 ## 3. Expressions and event selectors
 
 The JSON Schemas type these as free strings, so the schema catalogues cannot answer them.
 
-- Expression functions: `exports/vega-v6.expressions.catalog.json`. The `functions` array holds
-  each name; `categories` groups them and `signatures` gives the arguments. Cards:
+- Expression functions: `exports/vega-v6.expressions.catalog.json`. Each entry of `functions[]`
+  carries `name`, `signatures`, `documented` and `since`; the top-level `categories` groups the
+  functions. Entries with `documented: false` are internal names: never write them. Cards:
   `reference/vega/expressions/README.md` and one page per category in `reference/vega/expressions/`.
 - Event selectors: `exports/vega-v6.event-streams.catalog.json`. The `markTypes`, `markEventTypes`,
   `namedSources` and `specialEventTypes` keys are the vocabulary; `syntax` and `examples` show the
   grammar. Card: `reference/vega/event-streams.md`.
 
-These two are Vega 6 vocabularies and are the only ones in the plugin. Vega-Lite expressions
-compile to Vega expressions, so the same function list applies; its `on` and `clear` selectors
-use the Vega selector grammar.
+These two are the only expression and event-stream vocabularies in the plugin, and both are Vega
+6.4.0. Function entries carry `since`, and so do versioned special event types; check it against the
+spec's version before using the name. `resize` is `since: "6.4"`, for example, so a spec that
+declares a v5 `$schema` cannot use it. Vega-Lite expressions compile to Vega expressions, so the
+same function list applies, with the same `since` check; its `on` and `clear` selectors use the Vega
+selector grammar.
 
 ## 4. If the name is not there
 
@@ -76,8 +81,10 @@ does.
 
 ## Example
 
-A v5 Vega-Lite spec declares the version in `$schema`. The mark, channel and structural property
-names below are from the v5 catalogue; the objects inside `values` are data, not names.
+A v5 Vega-Lite spec declares the version in `$schema`. The v5 catalogue backs `bar` under `marks`,
+`x` and `y` under `channels`, and `$schema`, `data`, `values`, `mark`, `encoding`, `field` and
+`type` under `properties`. The encoding type values `nominal` and `quantitative` are in the schema
+but not catalogued, so they are not checked here; the objects inside `values` are data, not names.
 
 ```vega-lite
 {

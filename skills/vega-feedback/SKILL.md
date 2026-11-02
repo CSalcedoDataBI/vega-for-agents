@@ -1,6 +1,6 @@
 ---
 name: vega-feedback
-description: "Use when this plugin proves wrong or incomplete while working in any project: a catalogued name or a card the engine contradicts, a missing property, an example that does not reproduce, a gap you had to measure or guess, or the user says \"report this to vega-for-agents\" / \"la ficha está mal\". Files one sanitized issue on its public repo, after showing it to the user."
+description: "Use only for a finding about the vega-for-agents plugin's own catalogues, cards or skills, while working in any project: a catalogued Vega or Vega-Lite name or a card the engine contradicts, a missing property, an example that does not reproduce, a gap you had to measure or guess, or the user says \"report this to vega-for-agents\" / \"la ficha está mal\". Files one sanitized issue on its public repo, after showing it to the user."
 ---
 
 # Report a finding back to vega-for-agents
