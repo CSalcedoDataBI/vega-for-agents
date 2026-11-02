@@ -3,6 +3,7 @@
   "packages": {
     ".": {
       "release-type": "simple",
+      "release-as": "0.1.0",
       "component": "vega-for-agents",
       "changelog-path": "CHANGELOG.md",
       "include-component-in-tag": false,
