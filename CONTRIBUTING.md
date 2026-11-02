@@ -9,6 +9,11 @@ wrong, missing or catalogued under the wrong language, include:
 - the name and what the catalogue says about it;
 - a minimal spec and what the Vega/Vega-Lite compiler did with it.
 
+With the plugin installed, the `vega-feedback` skill collects the same evidence — a minimal
+standalone spec with inline data, the renderer and version, what the plugin says and what the
+engine did — rewrites anything project-specific, shows you the full text, and files a public issue
+only after you approve it. Without the plugin, open the issue directly with that evidence.
+
 ## Changes go through a pull request
 
 Every change to `main` comes in through a pull request, and the required `Validate` check must pass

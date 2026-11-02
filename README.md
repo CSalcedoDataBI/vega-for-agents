@@ -68,8 +68,21 @@ The vendored Vega files are © the University of Washington Interactive Data Lab
 | Schema-backed name check in CI | `scripts/check_repo.py` | done |
 | Expression functions + event-stream grammar (Vega 6) and their cards | the pinned Vega 6.4.0 source | done |
 | Trap notes + validated examples | drafted by a model, every name checked against the schema | drafting |
-| Reference cards and a plugin | promoted from the drafts | planned |
-| `vega-feedback` skill | report a wrong or missing card as a public issue | planned |
+| Reference skill | the catalogues and `reference/vega/` | drafted, not yet promoted |
+| Reference cards | promoted from the drafts | planned |
+| Plugin packaging | `.claude-plugin/` | drafted, not yet promoted |
+| `vega-feedback` skill | report a wrong or missing card as a public issue | drafted, not yet promoted |
+
+## Install (pre-release)
+
+The plugin is not in a plugin directory yet and its skills are drafts. It can be added from this
+repository's marketplace for testing:
+
+```bash
+/plugin marketplace add CSalcedoDataBI/vega-for-agents
+```
+
+Then install `vega-for-agents` from that marketplace.
 
 ## Pinned schema versions
 
