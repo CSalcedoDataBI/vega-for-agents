@@ -68,8 +68,21 @@ The vendored Vega files are © the University of Washington Interactive Data Lab
 | Schema-backed name check in CI | `scripts/check_repo.py` | done |
 | Expression functions + event-stream grammar (Vega 6) and their cards | the pinned Vega 6.4.0 source | done |
 | [Trap notes + validated examples](reference/drafts/README.md) | drafted by a model, every name checked against the schema | drafting |
-| Reference cards and a plugin | promoted from the drafts | planned |
-| `vega-feedback` skill | report a wrong or missing card as a public issue | planned |
+| Reference skill | the catalogues and `reference/vega/` | drafted, not yet promoted |
+| Reference cards | promoted from the drafts | planned |
+| Plugin packaging | `.claude-plugin/` | drafted, not yet promoted |
+| `vega-feedback` skill | report a wrong or missing card as a public issue | drafted, not yet promoted |
+
+## Install (pre-release)
+
+The plugin is not in a plugin directory yet and its skills are drafts. It can be added from this
+repository's marketplace for testing:
+
+```bash
+/plugin marketplace add CSalcedoDataBI/vega-for-agents
+```
+
+Then install `vega-for-agents` from that marketplace.
 
 ## Pinned schema versions
 
@@ -77,6 +90,19 @@ The catalogue is only as good as the schema it came from, so the exact schema is
 SHA-256 in each catalogue's `meta` block. The v6 catalogues also record `exactVersion` (Vega 6.4.0,
 Vega-Lite 6.4.3); the v5 catalogues are kept as they were, without inventing a release number.
 Changing a schema is a new extraction, never a hand edit.
+
+## Using the catalogues as data
+
+To consume the catalogues as data, pin a release tag `vX.Y.Z` instead of following `main`, copy
+`exports/` from that tag, and verify every file listed in `exports/manifest.json`. The manifest names
+the repository, the catalogue format version (`contract`) and one entry per exported file with its
+`kind`, `language`, `version`, `sha256` and — for a catalogue — the `contract` it declares and the
+`source` it was extracted from. Check each listed file's SHA-256 before reading it, then read
+`meta.contract` in the catalogue to know which format version you have.
+
+The contract version is independent of the Vega and Vega-Lite versions in `meta`: a patch release
+does not change what a reader sees, a minor release only adds optional keys, and a major release
+removes or renames a key or changes a type.
 
 ## Not in scope
 
