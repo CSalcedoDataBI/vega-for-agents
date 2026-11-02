@@ -43,11 +43,59 @@ class TestExtract(unittest.TestCase):
         self.assertIn("signals", v["properties"])
 
     def test_meta_pins_the_schema(self):
-        for lang in ec.SCHEMAS:
-            meta = self.catalogs[lang]["meta"]
+        for key, cfg in ec.SCHEMAS.items():
+            meta = self.catalogs[key]["meta"]
             self.assertEqual(len(meta["schemaSha256"]), 64)
-            self.assertEqual(meta["language"], lang)
+            self.assertEqual(meta["language"], cfg["language"])
+            self.assertEqual(meta["schemaVersion"], cfg["version"])
+            self.assertEqual(meta["package"], cfg["package"])
             self.assertTrue(meta["schemaFile"].endswith(".schema.json"))
+            if "exactVersion" in cfg:
+                self.assertEqual(meta["exactVersion"], cfg["exactVersion"])
+            else:
+                self.assertNotIn("exactVersion", meta)
+
+    def test_v6_is_the_default_and_v5_is_kept(self):
+        for key, cfg in ec.SCHEMAS.items():
+            notes = " ".join(self.catalogs[key]["meta"]["notes"])
+            self.assertIn("Deneb in Power BI", notes)
+            self.assertIn("`$schema` v5", notes)
+            self.assertIn("Vega" if cfg["language"] == "vega" else "Vega-Lite", notes)
+            if cfg["version"] == "v6":
+                self.assertIn("is the default. The v5 catalogue is kept", notes)
+            else:
+                self.assertIn("6 is the default. Check this catalogue", notes)
+
+    def test_vega_lite_v6_vocabularies(self):
+        v6 = self.catalogs["vega-lite-v6"]
+        v5 = self.catalogs["vega-lite"]
+        self.assertIn("week", v6["properties"])       # added in v6
+        self.assertNotIn("week", v5["properties"])
+        self.assertEqual(v6["marks"], v5["marks"])
+
+    def test_vega_v6_vocabularies(self):
+        v6 = self.catalogs["vega-v6"]
+        v5 = self.catalogs["vega"]
+        self.assertIn("inferUnits", v6["properties"])  # added in v6
+        self.assertNotIn("inferUnits", v5["properties"])
+        self.assertEqual(v6["transforms"], v5["transforms"])
+
+    def test_diff_report_is_generated_from_the_catalogues(self):
+        report = ec.diff_report(self.catalogs)
+        self.assertIn("## Vega-Lite", report)
+        self.assertIn("## Vega", report)
+        self.assertIn("Added: `week`", report)
+        self.assertIn("Added: `inferUnits`", report)
+        self.assertEqual(ec.DIFF_REPORT.read_text(encoding="utf-8"), report)
+
+    def test_diff_report_out_of_sync_fails(self):
+        original = ec.DIFF_REPORT.read_bytes()
+        try:
+            ec.DIFF_REPORT.write_bytes(original + b"\nstale\n")
+            errors = ec.check_all(self.catalogs)
+            self.assertTrue(any("schema-diff-v5-v6.md" in e for e in errors), errors)
+        finally:
+            ec.DIFF_REPORT.write_bytes(original)
 
     def test_meta_pins_the_vega_source(self):
         for lang in ec.SOURCE_CATALOGS:

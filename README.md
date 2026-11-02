@@ -6,10 +6,11 @@
 > [v0.1 epic](https://github.com/CSalcedoDataBI/vega-for-agents/issues/2) if you want to know when
 > that changes.
 
-The Vega and Vega-Lite reference for AI agents: two catalogues in one repository, with every
-valid name — mark, encoding channel, transform, scale, projection and property — **extracted from
-the official JSON Schemas** instead of typed from memory. Each one comes with the traps the
-documentation leaves out and an example that was validated against the schema.
+The Vega and Vega-Lite reference for AI agents: the catalogues for both languages in one
+repository, with every valid name — mark, encoding channel, transform, scale, projection and
+property — **extracted from the official JSON Schemas** instead of typed from memory. Each one
+comes with the traps the documentation leaves out and an example that was validated against the
+schema.
 
 It is the sibling of [spark-for-agents](https://github.com/CSalcedoDataBI/spark-for-agents),
 [dax-for-agents](https://github.com/CSalcedoDataBI/dax-for-agents) and
@@ -17,18 +18,26 @@ It is the sibling of [spark-for-agents](https://github.com/CSalcedoDataBI/spark-
 follows the same rule: **an agent never reads a name that did not come from the source of truth.**
 Here the source of truth is the published schema of each language.
 
-## Two catalogues in one repo
+## Catalogues
 
-| Catalogue | Source of truth | Vocabularies |
-|---|---|---|
-| **Vega-Lite v5** | [`vega-lite-v5.schema.json`](exports/vega-lite-v5.schema.json) | marks, encoding channels, transforms, scale types, projection types, every property |
-| **Vega v5** | [`vega-v5.schema.json`](exports/vega-v5.schema.json) | marks, transforms, scale types, every property (projection `type` is a free signal, so it is not enumerated) |
+| Catalogue | `$schema` | Source of truth | Vocabularies |
+|---|---|---|---|
+| **Vega-Lite v6** (default) | `https://vega.github.io/schema/vega-lite/v6.json` | [`vega-lite-v6.schema.json`](exports/vega-lite-v6.schema.json) | marks, encoding channels, transforms, scale types, projection types, every property |
+| **Vega v6** (default) | `https://vega.github.io/schema/vega/v6.json` | [`vega-v6.schema.json`](exports/vega-v6.schema.json) | marks, transforms, scale types, every property (projection `type` is a free signal, so it is not enumerated) |
+| **Vega-Lite v5** (kept) | `https://vega.github.io/schema/vega-lite/v5.json` | [`vega-lite-v5.schema.json`](exports/vega-lite-v5.schema.json) | marks, encoding channels, transforms, scale types, projection types, every property |
+| **Vega v5** (kept) | `https://vega.github.io/schema/vega/v5.json` | [`vega-v5.schema.json`](exports/vega-v5.schema.json) | marks, transforms, scale types, every property (projection `type` is a free signal, so it is not enumerated) |
+
+Vega 6 / Vega-Lite 6 is the default. **The v5 catalogues stay** because Deneb in Power BI and many
+published specs still declare `$schema` v5, so an agent writing for them must check the v5
+catalogue. `scripts/check_repo.py` chooses the catalogue from each spec's `$schema`; a spec with
+no `$schema`, or with an unknown major version, fails instead of being guessed.
 
 `scripts/extract_catalog.py` reads each schema and writes the catalogue of valid names
-(`exports/*.catalog.json`). `scripts/check_repo.py` — the required `Validate` check — fails if
-anything an agent reads (a card, or an example spec) uses a mark, channel, transform, scale type,
-projection type or structural property that is **not in the schema**. That is "no invented name",
-applied to Vega and Vega-Lite.
+(`exports/*.catalog.json`), plus the generated [`schema-diff-v5-v6.md`](reference/schema-diff-v5-v6.md)
+listing the names added and removed between the two versions. `scripts/check_repo.py` — the
+required `Validate` check — fails if anything an agent reads (a card, or an example spec) uses a
+mark, channel, transform, scale type, projection type or structural property that is **not in the
+schema named by its `$schema`**. That is "no invented name", applied to Vega and Vega-Lite.
 
 ## Expressions and event streams (Vega 6)
 
@@ -55,7 +64,7 @@ The vendored Vega files are © the University of Washington Interactive Data Lab
 
 | Piece | Source | Status |
 |---|---|---|
-| Name catalogues (Vega-Lite + Vega) | the two official JSON Schemas | done |
+| Name catalogues (Vega-Lite + Vega, v5 and v6) | the official JSON Schemas | done |
 | Schema-backed name check in CI | `scripts/check_repo.py` | done |
 | Expression functions + event-stream grammar (Vega 6) and their cards | the pinned Vega 6.4.0 source | done |
 | Trap notes + validated examples | drafted by a model, every name checked against the schema | drafting |
@@ -65,7 +74,9 @@ The vendored Vega files are © the University of Washington Interactive Data Lab
 ## Pinned schema versions
 
 The catalogue is only as good as the schema it came from, so the exact schema is pinned by
-SHA-256 in each catalogue's `meta` block. Changing a schema is a new extraction, never a hand edit.
+SHA-256 in each catalogue's `meta` block. The v6 catalogues also record `exactVersion` (Vega 6.4.0,
+Vega-Lite 6.4.3); the v5 catalogues are kept as they were, without inventing a release number.
+Changing a schema is a new extraction, never a hand edit.
 
 ## Not in scope
 

@@ -7,7 +7,11 @@
     "schemaDraft": "http://json-schema.org/draft-07/schema#",
     "definitions": 456,
     "source": "https://vega.github.io/schema/vega-lite/v5.json",
-    "generatedBy": "scripts/extract_catalog.py"
+    "package": "vega-lite",
+    "generatedBy": "scripts/extract_catalog.py",
+    "notes": [
+      "Kept because Deneb in Power BI and many published specs still declare `$schema` v5; Vega-Lite 6 is the default. Check this catalogue when a spec's `$schema` asks for v5."
+    ]
   },
   "marks": [
     "arc",

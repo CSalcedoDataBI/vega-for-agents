@@ -6,9 +6,10 @@
   declares `concurrency` (Actions cost rules R2, R3, R5).
 - No name outside the official schema: in what an agent reads (skills/**/*.md fenced ```vega /
   ```vega-lite example specs, and the drafts in lab/drafting/out/), every mark, encoding channel,
-  transform, scale type and structural property must be in the language's catalogue
-  (exports/*.catalog.json, extracted from exports/*.schema.json). "No invented name", for
-  Vega and Vega-Lite.
+  transform, scale type and structural property must be in the catalogue named by the spec's
+  `$schema` (exports/*.catalog.json, extracted from exports/*.schema.json). A spec with no
+  `$schema`, or with a major version other than 5 or 6, fails: the check never guesses.
+  "No invented name", for Vega and Vega-Lite.
 - No invented expression function or event stream: every function called in an expression string
   of an example spec (`expr`, `update`, `signal`, `test`, `calculate`, ...) or in a call written as
   inline code in a card (skills/ or reference/) must be in exports/vega-v6.expressions.catalog.json,
@@ -40,10 +41,18 @@ EVENT_KEYS = {"vega": {"events"}, "vega-lite": {"on", "clear"}}
 # Inline code in a card that is a whole call: `name(...)`, optionally indexed (`f()[0]`). Prose
 # such as `f(0) === 0` or `test(x) -> true` is not a call on its own and is not checked.
 INLINE_CALL = re.compile(r"`([A-Za-z_$][\w$]*\([^`]*\)(?:\[[^`\]]*\])?)`")
+# The four structural catalogues. `-v6` is the default target; `-v5` is kept for specs that still
+# declare v5. Which one a spec uses is decided by its `$schema`.
 CATALOGS = {
-    "vega-lite": ROOT / "exports" / "vega-lite-v5.catalog.json",
-    "vega": ROOT / "exports" / "vega-v5.catalog.json",
+    "vega-lite-v6": ROOT / "exports" / "vega-lite-v6.catalog.json",
+    "vega-v6": ROOT / "exports" / "vega-v6.catalog.json",
+    "vega-lite-v5": ROOT / "exports" / "vega-lite-v5.catalog.json",
+    "vega-v5": ROOT / "exports" / "vega-v5.catalog.json",
 }
+# The original language keys still resolve to the v5 catalogue for code that used them.
+CATALOG_ALIASES = {"vega-lite": "vega-lite-v5", "vega": "vega-v5"}
+# A schema URL: .../vega-lite/v6.json, .../vega/v5.json, or a patch version such as v6.4.3.
+SCHEMA_URL = re.compile(r"/(vega-lite|vega)/v(\d+(?:\.\d+)*)\.json(?:#.*)?$")
 # A fenced block whose info string names the language, capturing the language and the body.
 FENCE = re.compile(r"^```(vega-lite|vega)\s*\n(.*?)^```", re.M | re.S)
 # Keys whose object/array VALUES are user data (field names, arbitrary rows), not schema names.
@@ -116,12 +125,53 @@ def check_selector(selector: str, lang_cat: dict, where: str) -> list[str]:
     return errors
 
 
+def base_language(lang: str) -> str:
+    """`vega-lite-v6` -> `vega-lite`; `vega` -> `vega`."""
+    return "vega-lite" if lang.startswith("vega-lite") else "vega"
+
+
+def version_of(key: str) -> str:
+    """The schema version encoded in a catalogue key, if it has one."""
+    match = re.search(r"-v(\d+)$", key)
+    return f"v{match.group(1)}" if match else ""
+
+
+def schema_label(lang: str, cat: dict) -> str:
+    """`vega-lite v6`, for error messages. Catalogue metadata wins over the key."""
+    base = cat.get("language") or base_language(lang)
+    version = cat.get("schemaVersion") or version_of(lang)
+    return f"{base} {version}" if version else base
+
+
+def catalog_key_for_spec(spec, cats: dict, where: str) -> tuple[str | None, list[str]]:
+    """Pick the catalogue named by a spec's `$schema`; never guess, and name the file on failure."""
+    if not isinstance(spec, dict):
+        return None, [f"{where}: spec is not a JSON object, so its `$schema` cannot be read"]
+    schema = spec.get("$schema")
+    if not isinstance(schema, str) or not schema:
+        return None, [f"{where}: spec has no `$schema`; cannot choose a catalogue (expected a "
+                      f"Vega or Vega-Lite v5 or v6 schema URL)"]
+    match = SCHEMA_URL.search(schema)
+    if not match:
+        return None, [f"{where}: `$schema` {schema!r} is not a Vega or Vega-Lite v5 or v6 "
+                      f"schema URL"]
+    package, version = match.group(1), match.group(2).split(".")[0]
+    key = f"{package}-v{version}"
+    if key not in cats:
+        return None, [f"{where}: `$schema` {schema!r} names {package} v{version}, but no {key} "
+                      f"catalogue is loaded (only v5 and v6 are supported)"]
+    return key, []
+
+
 def load_catalogs(root: Path = ROOT):
     cats = {}
     for lang, path in CATALOGS.items():
         if path.exists():
             data = json.loads(path.read_text(encoding="utf-8"))
+            meta = data.get("meta", {})
             cats[lang] = {
+                "language": meta.get("language", base_language(lang)),
+                "schemaVersion": meta.get("schemaVersion", version_of(lang)),
                 "marks": set(data.get("marks", [])),
                 "channels": set(data.get("channels", [])),
                 "transforms": set(data.get("transforms", [])),
@@ -131,6 +181,9 @@ def load_catalogs(root: Path = ROOT):
                 "props": set(data.get("properties", [])) | set(data.get("channels", []))
                 | ALWAYS_OK_KEYS,
             }
+    for alias, key in CATALOG_ALIASES.items():
+        if key in cats:
+            cats[alias] = cats[key]
     return cats
 
 
@@ -180,8 +233,12 @@ def validate_spec(spec, lang: str, cat: dict, where: str, lang_cat: dict | None 
     """Walk a Vega/Vega-Lite spec and flag any name not in the catalogue. Closed vocabularies
     (marks, channels, transforms, scale types) are checked by context; property keys are checked
     against the catalogue's property set, skipping subtrees that hold user data. With `lang_cat`,
-    expression strings and event selectors are checked against the Vega language catalogues."""
+    expression strings and event selectors are checked against the Vega language catalogues.
+    `lang` may be a catalogue key (`vega-lite-v6`) or a language (`vega-lite`); the catalogue's
+    own metadata supplies the version in the error messages."""
     errors: list[str] = []
+    base = cat.get("language") or base_language(lang)
+    label = schema_label(lang, cat)
 
     def mark_type(node):
         if isinstance(node, str):
@@ -196,60 +253,61 @@ def validate_spec(spec, lang: str, cat: dict, where: str, lang_cat: dict | None 
             if "mark" in node:
                 m = mark_type(node["mark"])
                 if m is not None and m not in cat["marks"]:
-                    errors.append(f"{where}: mark '{m}' is not in the {lang} schema")
+                    errors.append(f"{where}: mark '{m}' is not in the {label} schema")
             # a Vega mark object: {"type": "symbol", ...}
-            if lang == "vega" and parent_key == "marks-item":
+            if base == "vega" and parent_key == "marks-item":
                 m = node.get("type")
                 if isinstance(m, str) and m not in cat["marks"]:
-                    errors.append(f"{where}: mark '{m}' is not in the {lang} schema")
+                    errors.append(f"{where}: mark '{m}' is not in the {label} schema")
             # encoding channels (Vega-Lite)
-            if lang == "vega-lite" and isinstance(node.get("encoding"), dict):
+            if base == "vega-lite" and isinstance(node.get("encoding"), dict):
                 for ch in node["encoding"]:
                     if ch not in cat["channels"]:
-                        errors.append(f"{where}: encoding channel '{ch}' is not in the {lang} schema")
+                        errors.append(f"{where}: encoding channel '{ch}' is not in the {label} schema")
             # transforms
             if isinstance(node.get("transform"), list):
                 for t in node["transform"]:
                     if not isinstance(t, dict):
                         continue
-                    if lang == "vega-lite":
+                    if base == "vega-lite":
                         if not (set(t.keys()) & cat["transforms"]):
                             errors.append(
                                 f"{where}: transform {sorted(t.keys())} has no known transform "
-                                f"keyword in the {lang} schema")
+                                f"keyword in the {label} schema")
                     else:
                         ty = t.get("type")
                         if isinstance(ty, str) and ty not in cat["transforms"]:
-                            errors.append(f"{where}: transform '{ty}' is not in the {lang} schema")
+                            errors.append(f"{where}: transform '{ty}' is not in the {label} schema")
             # scale type
             sc = node.get("scale")
             if isinstance(sc, dict) and isinstance(sc.get("type"), str):
                 if sc["type"] not in cat["scaleTypes"]:
-                    errors.append(f"{where}: scale type '{sc['type']}' is not in the {lang} schema")
+                    errors.append(f"{where}: scale type '{sc['type']}' is not in the {label} schema")
             # projection type (Vega-Lite enumerates these; Vega leaves it a free string)
             pr = node.get("projection")
             if cat["projectionTypes"] and isinstance(pr, dict) and isinstance(pr.get("type"), str):
                 if pr["type"] not in cat["projectionTypes"]:
-                    errors.append(f"{where}: projection type '{pr['type']}' is not in the {lang} schema")
+                    errors.append(f"{where}: projection type '{pr['type']}' is not in the "
+                                  f"{label} schema")
 
             # expression strings and event selectors
             if lang_cat is not None:
                 for key, value in node.items():
                     if key in EXPR_KEYS and isinstance(value, str):
                         errors.extend(check_expression(value, lang_cat, where))
-                    if key in EVENT_KEYS[lang] and isinstance(value, str):
+                    if key in EVENT_KEYS[base] and isinstance(value, str):
                         errors.extend(check_selector(value, lang_cat, where))
 
             # property-key check (skip user-data subtrees and free-key containers)
             free_keys = parent_key in FREE_KEY_PARENTS
             for key, value in node.items():
                 if not free_keys and key not in cat["props"]:
-                    errors.append(f"{where}: property '{key}' is not in the {lang} schema")
+                    errors.append(f"{where}: property '{key}' is not in the {label} schema")
                 if key in DATA_SUBTREES:
                     continue  # values / datum / usermeta hold user data, not schema names
                 # A Vega top-level "marks" array holds mark objects: tag them so their `type` is
                 # checked as a mark name.
-                if lang == "vega" and key == "marks":
+                if base == "vega" and key == "marks":
                     for item in (value if isinstance(value, list) else [value]):
                         walk(item, parent_key="marks-item")
                 else:
@@ -296,32 +354,47 @@ def check_names(root: Path = ROOT) -> list[str]:
         rel = md.relative_to(root).as_posix()
         text = md.read_text(encoding="utf-8")
         for i, (lang, body) in enumerate(FENCE.findall(text), 1):
-            if lang not in cats:
-                continue
+            where = f"{rel} ({lang} block #{i})"
             try:
                 spec = json.loads(body)
             except json.JSONDecodeError as exc:
                 errors.append(f"{rel}: {lang} block #{i} is not valid JSON ({exc})")
                 continue
-            errors += validate_spec(spec, lang, cats[lang], f"{rel} ({lang} block #{i})", lang_cat)
+            key, select_errors = catalog_key_for_spec(spec, cats, where)
+            if select_errors:
+                errors += select_errors
+                continue
+            if cats[key]["language"] != lang:
+                errors.append(f"{where}: fenced as {lang} but `$schema` is "
+                              f"{schema_label(key, cats[key])}")
+                continue
+            errors += validate_spec(spec, key, cats[key], where, lang_cat)
 
     for draft in sorted(draft_files):
         rel = draft.relative_to(root).as_posix()
         data = json.loads(draft.read_text(encoding="utf-8"))
         for note in data.get("notes", []):
-            lang = note.get("lang")
-            if lang not in cats:
-                errors.append(f"{rel}: note has unknown lang '{lang}'")
-                continue
-            cat = cats[lang]
             name = note.get("name", "")
+            example = note.get("example")
+            where = f"{rel} (note '{name}')"
+            key = None
+            if isinstance(example, (dict, list)):
+                key, select_errors = catalog_key_for_spec(example, cats, where)
+                errors += select_errors
+                if key is not None:
+                    errors += validate_spec(example, key, cats[key], where, lang_cat)
+            if key is None:
+                lang = note.get("lang")
+                if lang not in cats:
+                    errors.append(f"{rel}: note has unknown lang '{lang}'")
+                    continue
+                key = lang
+            cat = cats[key]
             vocab = (cat["marks"] | cat["channels"] | cat["transforms"] | cat["scaleTypes"]
                      | cat["projectionTypes"] | cat["props"])
             if name and name not in vocab:
-                errors.append(f"{rel}: name '{name}' is not in the {lang} schema")
-            example = note.get("example")
-            if isinstance(example, (dict, list)):
-                errors += validate_spec(example, lang, cat, f"{rel} (note '{name}')", lang_cat)
+                errors.append(f"{rel}: name '{name}' is not in the "
+                              f"{schema_label(key, cat)} schema")
     return errors
 
 

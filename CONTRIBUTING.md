@@ -31,6 +31,23 @@ Expression functions and event streams follow the same rule against the Vega sou
 `python scripts/vega_sources.py --fetch`, paste the printed SHA-256 pins into `FILES`, and run
 `python scripts/extract_catalog.py`. Never edit a file under `sources/` or `reference/vega/`.
 
+## Moving to a new schema version
+
+The structural catalogues are pinned per major version. To pin a new one:
+
+1. Download the published schema byte for byte — no reformatting, no newline changes — to
+   `exports/<language>-v<N>.schema.json`. For example:
+   `curl -fsSL https://vega.github.io/schema/vega-lite/v6.json -o exports/vega-lite-v6.schema.json`.
+2. Verify its SHA-256 (`sha256sum exports/vega-lite-v6.schema.json`) against the release you mean
+   to pin. Do not continue if it differs.
+3. Add or update the entry in `SCHEMAS` in `scripts/extract_catalog.py`: `schema`, `catalog`,
+   `version`, `language`, `package`, `exactVersion` (the release, such as `6.4.3`) and `source`.
+   The v5 entries stay: the v5 catalogues are kept for specs that still declare `$schema` v5.
+4. Run `python scripts/extract_catalog.py`. It writes the catalogue, the generated
+   `reference/schema-diff-v5-v6.md` and the cards; never edit those files by hand.
+5. Run `python scripts/extract_catalog.py --check` and `python scripts/check_repo.py`, then the
+   tests. The extractor writes the schema's SHA-256 into the catalogue `meta` from the file itself.
+
 ## License
 
 By contributing, you agree that your contribution is licensed under the [MIT License](LICENSE).
