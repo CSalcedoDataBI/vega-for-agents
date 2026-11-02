@@ -7,8 +7,10 @@
     "schemaDraft": "http://json-schema.org/draft-07/schema#",
     "definitions": 131,
     "source": "https://vega.github.io/schema/vega/v5.json",
+    "package": "vega",
     "generatedBy": "scripts/extract_catalog.py",
     "notes": [
+      "Kept because Deneb in Power BI and many published specs still declare `$schema` v5; Vega 6 is the default. Check this catalogue when a spec's `$schema` asks for v5.",
       "The Vega schema leaves `marktype` as a free string (no enum); `marks` is taken from the Vega-Lite MarkType enum, the same primitive mark set of the official Vega project.",
       "Signals are user-named and have no closed vocabulary, so they are not catalogued; signal-related property names are in `properties`.",
       "Projection `type` in Vega is a stringOrSignal (free), so there is no projectionTypes vocabulary here; Vega-Lite does enumerate ProjectionType."

@@ -1,6 +1,8 @@
 """Tests for scripts/check_repo.py: valid specs pass, invented names fail."""
 
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -12,8 +14,9 @@ from scripts import check_repo as cr  # noqa: E402
 class TestNameCheck(unittest.TestCase):
     def setUp(self):
         self.cats = cr.load_catalogs()
-        self.assertIn("vega-lite", self.cats)
-        self.assertIn("vega", self.cats)
+        for key in ("vega-lite", "vega", "vega-lite-v5", "vega-v5",
+                    "vega-lite-v6", "vega-v6"):
+            self.assertIn(key, self.cats)
 
     def v(self, spec, lang):
         return cr.validate_spec(spec, lang, self.cats[lang], "T")
@@ -93,6 +96,76 @@ class TestNameCheck(unittest.TestCase):
         self.assertTrue(any("mark 'blob'" in e for e in errs))
         self.assertTrue(any("transform 'frobnicate'" in e for e in errs))
 
+    def test_error_names_the_language_and_version(self):
+        errs = self.v({"mark": "bubble"}, "vega-lite-v6")
+        self.assertTrue(any("mark 'bubble' is not in the vega-lite v6 schema" in e for e in errs),
+                        errs)
+
+
+class TestSchemaSelection(unittest.TestCase):
+    def setUp(self):
+        self.cats = cr.load_catalogs()
+
+    def test_v6_schema_selects_the_v6_catalogue(self):
+        spec = {"$schema": "https://vega.github.io/schema/vega-lite/v6.json", "week": 1}
+        key, errors = cr.catalog_key_for_spec(spec, self.cats, "T")
+        self.assertEqual(errors, [])
+        self.assertEqual(key, "vega-lite-v6")
+        self.assertEqual(cr.validate_spec(spec, key, self.cats[key], "T"), [])
+
+    def test_v5_schema_selects_the_v5_catalogue(self):
+        spec = {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "week": 1}
+        key, errors = cr.catalog_key_for_spec(spec, self.cats, "T")
+        self.assertEqual(errors, [])
+        self.assertEqual(key, "vega-lite-v5")
+        errs = cr.validate_spec(spec, key, self.cats[key], "T")
+        self.assertTrue(any("property 'week' is not in the vega-lite v5 schema" in e
+                            for e in errs), errs)
+
+    def test_vega_v6_schema_selects_the_vega_v6_catalogue(self):
+        spec = {"$schema": "https://vega.github.io/schema/vega/v6.json", "inferUnits": 1}
+        key, errors = cr.catalog_key_for_spec(spec, self.cats, "T")
+        self.assertEqual(errors, [])
+        self.assertEqual(key, "vega-v6")
+        self.assertEqual(cr.validate_spec(spec, key, self.cats[key], "T"), [])
+
+    def test_check_names_uses_the_schema_version(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "skills").mkdir()
+            card = root / "skills" / "card.md"
+            card.write_text("```vega-lite\n"
+                            + json.dumps({"$schema": "https://vega.github.io/schema/"
+                                                     "vega-lite/v6.json", "week": 1})
+                            + "\n```\n", encoding="utf-8")
+            self.assertEqual(cr.check_names(root), [])
+            card.write_text("```vega-lite\n"
+                            + json.dumps({"$schema": "https://vega.github.io/schema/"
+                                                     "vega-lite/v5.json", "week": 1})
+                            + "\n```\n", encoding="utf-8")
+            errs = cr.check_names(root)
+            self.assertTrue(any("card.md" in e and "vega-lite v5 schema" in e for e in errs), errs)
+
+    def test_missing_schema_fails_and_names_the_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "skills").mkdir()
+            (root / "skills" / "noschema.md").write_text(
+                "```vega-lite\n{\"mark\": \"bar\"}\n```\n", encoding="utf-8")
+            errs = cr.check_names(root)
+            self.assertTrue(any("noschema.md" in e and "`$schema`" in e for e in errs), errs)
+
+    def test_unknown_schema_major_fails_and_names_the_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "skills").mkdir()
+            (root / "skills" / "v7.md").write_text(
+                "```vega-lite\n"
+                '{"$schema": "https://vega.github.io/schema/vega-lite/v7.json", "mark": "bar"}\n'
+                "```\n", encoding="utf-8")
+            errs = cr.check_names(root)
+            self.assertTrue(any("v7.md" in e and "v7" in e for e in errs), errs)
+
 
 class TestExpressionAndEventCheck(unittest.TestCase):
     def setUp(self):
@@ -160,8 +233,9 @@ class TestExpressionAndEventCheck(unittest.TestCase):
 
 class TestRepoShape(unittest.TestCase):
     def test_catalogs_present(self):
-        self.assertTrue((cr.ROOT / "exports" / "vega-lite-v5.catalog.json").exists())
-        self.assertTrue((cr.ROOT / "exports" / "vega-v5.catalog.json").exists())
+        for name in ("vega-lite-v5.catalog.json", "vega-v5.catalog.json",
+                     "vega-lite-v6.catalog.json", "vega-v6.catalog.json"):
+            self.assertTrue((cr.ROOT / "exports" / name).exists(), name)
         self.assertTrue((cr.ROOT / cr.EXPRESSIONS).exists())
         self.assertTrue((cr.ROOT / cr.EVENT_STREAMS).exists())
 
