@@ -6,11 +6,13 @@
 `encoding`, and transforms run in the order they are listed.
 
 **Why it happens:** `encoding` maps fields to visual channels; it does not change the data. A
-`filter` written under `encoding` is read as an encoding channel and is not a transform. Order
-matters too: a filter that uses a calculated field must come after the `calculate` that creates it.
+`filter` inside `encoding` is not a channel; Vega-Lite drops it with a warning and does not filter
+the data. Order matters too: a filter that uses a calculated field must come after the `calculate`
+that creates it.
 
-**Wrong form:** `"encoding": {"filter": ...}` instead of a top-level `transform`, or the filter
-placed before the `calculate` whose output it tests.
+**Wrong form:** `"encoding": {"filter": ...}` instead of a top-level `transform` — Vega-Lite drops
+the filter with a warning and does not filter the data — or the filter placed before the
+`calculate` whose output it tests.
 
 ```vega-lite
 {
