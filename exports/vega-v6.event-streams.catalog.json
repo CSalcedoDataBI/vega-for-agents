@@ -1,5 +1,6 @@
 {
   "meta": {
+    "contract": "1.0.0",
     "language": "vega",
     "vocabulary": "event streams",
     "vegaVersion": "6.4.0",

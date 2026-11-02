@@ -1,5 +1,6 @@
 {
   "meta": {
+    "contract": "1.0.0",
     "language": "vega",
     "schemaVersion": "v6",
     "schemaFile": "vega-v6.schema.json",
