@@ -49,9 +49,8 @@ confirm the version.
 
 ## 3. Check the adopted traps
 
-`exports/adopted-traps.catalog.json` carries the authoring traps adopted from issue #20. Each
-entry has a stable `id`, its `language`, a `symptom`, a `cause`, a `fix` and the `status` of its
-deduplication (`adopted`, `merged` or `rejected`). Read the entries for the language in hand before
+`exports/adopted-traps.catalog.json` lists known authoring traps. Each entry has a stable `id`,
+its `language`, a `symptom`, a `cause` and a `fix`. Read the entries for the language in hand before
 writing a spec; the long form of each note is under `reference/drafts/`, and its table maps each id
 to its note.
 

@@ -2,15 +2,16 @@
 
 > Draft. Vega v6. Trap ID: `vega-layout-bounds-flush`.
 
-**Symptom:** with `"full"` a mark at negative `y` counts toward the row height; with `"flush"` it
-is excluded and overlaps the previous row. Telltale sign: only the first row's header is fully
-visible.
+**Symptom:** the next row's header overlaps the row above it. With `"full"` a mark at negative `y`
+counts toward the row height; with `"flush"` it is excluded. Telltale sign: only the first row's
+header is fully visible.
 
 **Cause:** the `flush` bounds ignore the part of a mark that extends past the cell's top or left
 edge, so the layout allocates less room than the mark actually uses.
 
 **Wrong form:** the example below with `layout.bounds: "flush"`: each cell draws its header text at a
-negative `y`, so with two rows the second header lands on top of the first cell.
+negative `y`, so with two rows and a small `padding.row` the second header lands on top of the first cell
+(row 2 starts at `y=24` instead of `y=45`).
 
 **Fix:** use `layout.bounds: "full"` when a mark draws at a negative offset from the cell, or move
 the mark inside the cell.
@@ -20,7 +21,7 @@ the mark inside the cell.
   "$schema": "https://vega.github.io/schema/vega/v6.json",
   "width": 240,
   "height": 120,
-  "layout": {"columns": 1, "padding": {"row": 24}, "bounds": "full"},
+  "layout": {"columns": 1, "padding": {"row": 4}, "bounds": "full"},
   "marks": [
     {
       "type": "group",

@@ -14,7 +14,7 @@ which is generated from `scripts/adopted_traps.py`.
 | `vl-tooltip-array` | [Tooltips as an array of field definitions](tooltip-array.md) | Vega-Lite |
 | `vl-transform-placement` | [Transforms at the view level, in order](filter-transform.md) | Vega-Lite |
 | `vl-layer-encoding` | [Layers carry their own mark and, when needed, encoding](layers.md) | Vega-Lite |
-| `vega-signal-declaration-order` | [Vega signals must be declared before they are read](signals.md) | Vega |
+| `vega-signal-declaration-order` | [A Vega signal must be declared in scope](signals.md) | Vega |
 | `vega-data-forward-reference` | [`data('x')` reads a dataset declared later](data-forward-reference.md) | Vega |
 | `vega-random-in-transform` | [`random()` in a transform moves the scene on every re-render](random-transform.md) | Vega |
 | `vega-index-lcg` | [An "LCG" evaluated over the index draws diagonals](index-lcg.md) | Vega |

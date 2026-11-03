@@ -75,12 +75,12 @@
     {
       "id": "vega-signal-declaration-order",
       "language": "vega",
-      "title": "Signal referenced before it is declared",
-      "symptom": "`Unknown signal name`.",
-      "cause": "An expression earlier in the spec reads a signal that is declared later.",
-      "fix": "Declare signals before the marks and data that read them.",
+      "title": "Signal read but never declared",
+      "symptom": "`Unrecognized signal name: \"x\"`.",
+      "cause": "An expression, mark channel or transform reads a signal that no `signals` entry of the top level or an enclosing group declares. The order of the declarations does not matter.",
+      "fix": "Add a `signals` entry that declares the name, in the top level or in the enclosing group.",
       "status": "merged",
-      "reason": "The existing signals note covered signal declaration; its ordering case was expanded with the issue's text.",
+      "reason": "The existing signals note covered signal declaration; the issue's text was merged into it. The issue's ordering claim was corrected after measuring with Vega 6.4.0: a signal declared later resolves, only an undeclared one fails.",
       "mergedInto": "reference/drafts/signals.md"
     },
     {

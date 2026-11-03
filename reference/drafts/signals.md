@@ -1,22 +1,22 @@
-# Vega signals must be declared before they are read
+# A Vega signal must be declared in scope
 
 > Draft. Vega v6. Trap ID: `vega-signal-declaration-order`.
 
-**Symptom:** `Unknown signal name`.
+**Symptom:** `Unrecognized signal name: "hovered"`, and the spec does not render.
 
-**The trap:** a signal must be declared at the top level or in the enclosing group before a mark
-or a data transform references it by name. Declaration order matters: an expression earlier in the
-spec than the `signals` entry cannot see that signal yet.
+**The trap:** a signal that an expression, mark channel or data transform reads must be declared in
+a `signals` entry of the top level or of an enclosing group. Declaration order does not matter:
+Vega 6.4.0 resolves a signal declared after the expression that reads it. Only a name that is never
+declared fails.
 
 **Why it happens:** a Vega expression has no implicit globals. `{"signal": "barColor"}` reads a
 signal called `barColor`, and the dataflow only knows that name once a `signals` entry declares it.
-Spelling the name in a mark does not declare it, and a data transform evaluated before the
-declaration cannot read it either.
+Spelling the name in a mark does not declare it.
 
 **Wrong form:** a mark channel such as `{"signal": "hovered"}` with no `signals` entry that
-declares `hovered`, or a data transform that reads a signal before the `signals` array declares it.
+declares `hovered` at the top level or in the enclosing group.
 
-**Fix:** declare signals before the marks and data that read them.
+**Fix:** add a `signals` entry that declares the name, in the top level or in the enclosing group.
 
 ```vega
 {
