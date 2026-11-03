@@ -108,6 +108,49 @@ class TestExtract(unittest.TestCase):
                 self.assertEqual(sha, vs.FILES[path])
 
 
+class TestAdoptedTraps(unittest.TestCase):
+    def setUp(self):
+        self.catalogs = ec.build_all()
+        self.traps = self.catalogs["adopted-traps"]["traps"]
+
+    def test_every_issue_trap_has_a_stable_unique_id(self):
+        self.assertEqual(len(self.traps), 11)
+        ids = [trap["id"] for trap in self.traps]
+        self.assertEqual(len(ids), len(set(ids)))
+        for trap in self.traps:
+            self.assertTrue(trap["id"])
+            self.assertIn(trap["language"], ("vega", "vega-lite"))
+            self.assertIn(trap["status"], ("adopted", "merged", "rejected"))
+            for key in ("title", "symptom", "cause", "fix", "reason"):
+                self.assertTrue(trap[key].strip(), f"{trap['id']}: empty {key}")
+
+    def test_merged_traps_name_the_existing_note(self):
+        merged = [trap for trap in self.traps if trap["status"] == "merged"]
+        self.assertEqual(len(merged), 5)
+        for trap in merged:
+            self.assertTrue((ec.ROOT / trap["mergedInto"]).exists(), trap["mergedInto"])
+
+    def test_adopted_traps_name_their_note(self):
+        adopted = [trap for trap in self.traps if trap["status"] == "adopted"]
+        self.assertEqual(len(adopted), 6)
+        for trap in adopted:
+            self.assertTrue((ec.ROOT / trap["card"]).exists(), trap["card"])
+
+    def test_trap_catalogue_is_generated_and_in_the_manifest(self):
+        self.assertEqual(ec.check_trap_catalog(self.catalogs["adopted-traps"]), [])
+        files = {entry["path"]: entry for entry in ec.build_manifest(self.catalogs)["files"]}
+        entry = files["exports/adopted-traps.catalog.json"]
+        self.assertEqual(entry["kind"], "catalog")
+        self.assertEqual(entry["contract"], ec.CONTRACT_VERSION)
+        self.assertEqual(entry["version"], "v6")
+
+    def test_missing_trap_catalogue_fails_check(self):
+        catalogs = dict(self.catalogs)
+        del catalogs["adopted-traps"]
+        errors = ec.check_all(catalogs)
+        self.assertTrue(any("adopted-traps.catalog.json" in e for e in errors), errors)
+
+
 class TestContractAndManifest(unittest.TestCase):
     def setUp(self):
         self.catalogs = ec.build_all()

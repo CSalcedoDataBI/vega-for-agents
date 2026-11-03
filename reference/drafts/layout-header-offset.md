@@ -1,0 +1,71 @@
+# `bounds` and `offset` do not move a group with a header role
+
+> Draft. Vega v6. Trap ID: `vega-layout-header-offset`.
+
+**Symptom:** switching `bounds` changes nothing, and `offset.rowHeader` moves the group
+horizontally, never vertically.
+
+**Cause:** a group with `role: "row-header"` (or another header role) is placed by the header
+logic, not by the grid bounds or the row-header offset. The header role takes the group out of the
+normal grid placement.
+
+**Wrong form:** changing `layout.bounds` or `layout.offset.rowHeader` to move a header group
+vertically.
+
+**Fix:** use `layout.padding.row` to create the space between rows; the header's own negative `y`
+decides where it sits inside that space. They are two independent controls.
+
+```vega
+{
+  "$schema": "https://vega.github.io/schema/vega/v6.json",
+  "width": 240,
+  "height": 120,
+  "layout": {
+    "columns": 2,
+    "padding": {"row": 24},
+    "offset": {"rowHeader": 0}
+  },
+  "marks": [
+    {
+      "type": "group",
+      "role": "row-header",
+      "encode": {
+        "enter": {
+          "x": {"value": 0},
+          "y": {"value": -12},
+          "width": {"value": 80},
+          "height": {"value": 20}
+        }
+      },
+      "marks": [
+        {"type": "text", "encode": {"enter": {"text": {"value": "Row"}}}}
+      ]
+    },
+    {
+      "type": "group",
+      "encode": {
+        "enter": {
+          "x": {"value": 0},
+          "y": {"value": 0},
+          "width": {"value": 80},
+          "height": {"value": 20}
+        }
+      },
+      "marks": [
+        {
+          "type": "rect",
+          "encode": {
+            "enter": {
+              "x": {"value": 0},
+              "y": {"value": 0},
+              "width": {"value": 80},
+              "height": {"value": 20},
+              "fill": {"value": "steelblue"}
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```

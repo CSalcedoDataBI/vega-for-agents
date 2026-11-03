@@ -26,10 +26,15 @@ python -m unittest discover -s tests
 
 ## No name outside the schema
 
-The catalogues under `exports/` are extracted from the official JSON Schemas by
+The name catalogues under `exports/` are extracted from the official JSON Schemas by
 `scripts/extract_catalog.py`, never typed by hand. Anything an agent reads may only name marks,
 channels, transforms, scale types and properties that are in them, and `Validate` fails otherwise.
 If a name is missing, the fix is a new schema version and a re-extraction, not a hand edit.
+
+The trap catalogue is authored reference content rather than extracted vocabulary.
+`exports/adopted-traps.catalog.json` is written by `scripts/extract_catalog.py` from
+`scripts/adopted_traps.py`, and it adds no marks, channels, transforms, scale types or properties
+to the name catalogues. Edit the source module, never the export.
 
 Expression functions and event streams follow the same rule against the Vega source pinned in
 `scripts/vega_sources.py`. To move to a new Vega version, change `VERSION` and `COMMIT` there, run
