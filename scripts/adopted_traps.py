@@ -73,7 +73,8 @@ TRAPS = [
                "applies to that layer only; put it in the parent view to share it.",
         "status": "merged",
         "reason": "The existing filter-transform note covered view-level and ordered transforms; "
-                  "the issue's layer case was merged into it.",
+                  "the issue's layer case was merged into it. The issue's layer claim was corrected "
+                  "after measuring with Vega-Lite 6.4.3: a layer transform applies to that layer only.",
         "mergedInto": "reference/drafts/filter-transform.md",
     },
     {
@@ -129,7 +130,8 @@ TRAPS = [
                "deterministic function.",
         "status": "adopted",
         "reason": "No existing draft note covers unseeded randomness in a transform; added as a "
-                  "new note.",
+                  "new note. The cause was corrected after measuring with Vega 6.4.0: a transform "
+                  "redraws when something it reads changes, not on every run.",
         "card": "reference/drafts/random-transform.md",
     },
     {
@@ -148,7 +150,7 @@ TRAPS = [
         "id": "vega-layout-bounds-flush",
         "language": "vega",
         "title": "`bounds: \"flush\"` drops marks drawn at negative offsets from the cell size",
-        "symptom": "With `\"full\"` a mark at negative `y` counts toward the row height; with "
+        "symptom": "The next row's header overlaps the row above it. With `\"full\"` a mark at negative `y` counts toward the row height; with "
                    "`\"flush\"` it is excluded and overlaps the previous row. Telltale sign: only "
                    "the first row's header is fully visible.",
         "cause": "The `flush` bounds ignore the part of a mark that extends past the cell's top "
@@ -171,7 +173,9 @@ TRAPS = [
                "header group's own `y`, so a `y` in its `encode` is ignored; position the header's "
                "content with marks inside the group.",
         "status": "adopted",
-        "reason": "No existing draft note covers header roles in a layout; added as a new note.",
+        "reason": "No existing draft note covers header roles in a layout; added as a new note. The "
+                  "fix was corrected after measuring with Vega 6.4.0: the layout ignores a header "
+                  "group's own `y`.",
         "card": "reference/drafts/layout-header-offset.md",
     },
 ]
