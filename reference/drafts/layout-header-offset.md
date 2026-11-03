@@ -12,8 +12,9 @@ normal grid placement.
 **Wrong form:** changing `layout.bounds` or `layout.offset.rowHeader` to move a header group
 vertically.
 
-**Fix:** use `layout.padding.row` to create the space between rows; the header's own negative `y`
-decides where it sits inside that space. They are two independent controls.
+**Fix:** use `layout.padding.row` to create the space between rows. The layout sets the header
+group's own `y`, so a `y` in its `encode` is ignored; position the header's content with marks
+inside the group.
 
 ```vega
 {
@@ -32,7 +33,6 @@ decides where it sits inside that space. They are two independent controls.
       "encode": {
         "enter": {
           "x": {"value": 0},
-          "y": {"value": -12},
           "width": {"value": 80},
           "height": {"value": 20}
         }

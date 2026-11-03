@@ -55,8 +55,8 @@
       "language": "vega-lite",
       "title": "Transform in the wrong place",
       "symptom": "A filter or aggregate is ignored.",
-      "cause": "`transform` is nested in `encoding`, or in a layer that does not own the data.",
-      "fix": "Put `transform` at the same level as `mark` and `encoding` of the view that owns the data.",
+      "cause": "`transform` is nested in `encoding`, which is not a channel; or it sits in one layer while the other layers are expected to see its result.",
+      "fix": "Put `transform` at the same level as `mark` and `encoding`. A transform in a layer applies to that layer only; put it in the parent view to share it.",
       "status": "merged",
       "reason": "The existing filter-transform note covered view-level and ordered transforms; the issue's layer case was merged into it.",
       "mergedInto": "reference/drafts/filter-transform.md"
@@ -99,7 +99,7 @@
       "language": "vega",
       "title": "`random()` in a transform moves the scene on every re-render",
       "symptom": "Generated points jump on resize or on any re-run.",
-      "cause": "Transforms re-evaluate on every dataflow run and `random()` has no seed.",
+      "cause": "A transform re-evaluates whenever something it reads changes (a signal, a field or its input data, such as `width` after a resize), and `random()` has no seed, so every re-evaluation draws new values.",
       "fix": "Derive positions from an index (`sequence` transform, `as: \"i\"`) with a deterministic function.",
       "status": "adopted",
       "reason": "No existing draft note covers unseeded randomness in a transform; added as a new note.",
@@ -133,7 +133,7 @@
       "title": "`bounds` and `offset` do not move a group with a header role",
       "symptom": "Switching `bounds` changes nothing, and `offset.rowHeader` moves the group horizontally, never vertically.",
       "cause": "A group with `role: \"row-header\"` (or another header role) is placed by the header logic, not by the grid bounds or the row-header offset.",
-      "fix": "Use `layout.padding.row` to create the space between rows; the header's own negative `y` decides where it sits inside that space. They are two independent controls.",
+      "fix": "Use `layout.padding.row` to create the space between rows. The layout sets the header group's own `y`, so a `y` in its `encode` is ignored; position the header's content with marks inside the group.",
       "status": "adopted",
       "reason": "No existing draft note covers header roles in a layout; added as a new note.",
       "card": "reference/drafts/layout-header-offset.md"

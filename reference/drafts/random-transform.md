@@ -4,8 +4,9 @@
 
 **Symptom:** generated points jump on resize or on any re-run.
 
-**Cause:** transforms re-evaluate on every dataflow run and `random()` has no seed. The values are
-new on each run, so the scene moves even though the spec did not change.
+**Cause:** a transform re-evaluates whenever something it reads changes: a signal, a field or its
+input data, such as `width` after a resize. `random()` has no seed, so every re-evaluation draws new
+values and the scene moves even though the spec did not change.
 
 **Wrong form:** a `formula` or other transform that sets a position with `random()`.
 
