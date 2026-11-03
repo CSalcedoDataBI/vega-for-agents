@@ -11,7 +11,8 @@ values and the scene moves even though the spec did not change.
 **Wrong form:** a `formula` or other transform that sets a position with `random()`.
 
 **Fix:** derive positions from an index (`sequence` transform, `as: "i"`) with a deterministic
-function.
+function. A sine hash does this; [the index-LCG note](index-lcg.md) explains why a modular
+formula over the index does not.
 
 ```vega
 {

@@ -9,7 +9,8 @@ visible.
 **Cause:** the `flush` bounds ignore the part of a mark that extends past the cell's top or left
 edge, so the layout allocates less room than the mark actually uses.
 
-**Wrong form:** `layout.bounds: "flush"` while a cell draws a header at a negative `y`.
+**Wrong form:** the example below with `layout.bounds: "flush"`: each cell draws its header text at a
+negative `y`, so with two rows the second header lands on top of the first cell.
 
 **Fix:** use `layout.bounds: "full"` when a mark draws at a negative offset from the cell, or move
 the mark inside the cell.
@@ -19,28 +20,12 @@ the mark inside the cell.
   "$schema": "https://vega.github.io/schema/vega/v6.json",
   "width": 240,
   "height": 120,
-  "layout": {"columns": 2, "padding": {"row": 24}, "bounds": "full"},
+  "layout": {"columns": 1, "padding": {"row": 24}, "bounds": "full"},
   "marks": [
     {
       "type": "group",
       "encode": {
         "enter": {
-          "x": {"value": 0},
-          "y": {"value": -12},
-          "width": {"value": 100},
-          "height": {"value": 20}
-        }
-      },
-      "marks": [
-        {"type": "text", "encode": {"enter": {"text": {"value": "Header"}}}}
-      ]
-    },
-    {
-      "type": "group",
-      "encode": {
-        "enter": {
-          "x": {"value": 0},
-          "y": {"value": 0},
           "width": {"value": 100},
           "height": {"value": 20}
         }
@@ -50,12 +35,43 @@ the mark inside the cell.
           "type": "rect",
           "encode": {
             "enter": {
-              "x": {"value": 0},
-              "y": {"value": 0},
               "width": {"value": 100},
               "height": {"value": 20},
               "fill": {"value": "steelblue"}
             }
+          }
+        },
+        {
+          "type": "text",
+          "encode": {
+            "enter": {"y": {"value": -12}, "text": {"value": "Header"}}
+          }
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "encode": {
+        "enter": {
+          "width": {"value": 100},
+          "height": {"value": 20}
+        }
+      },
+      "marks": [
+        {
+          "type": "rect",
+          "encode": {
+            "enter": {
+              "width": {"value": 100},
+              "height": {"value": 20},
+              "fill": {"value": "steelblue"}
+            }
+          }
+        },
+        {
+          "type": "text",
+          "encode": {
+            "enter": {"y": {"value": -12}, "text": {"value": "Header"}}
           }
         }
       ]

@@ -7,6 +7,9 @@
 **Cause:** `type` does not match the data. `nominal` on dates makes Vega-Lite treat them as
 categories, and `quantitative` on text asks for a measure that the values cannot support.
 
+**Wrong form:** `"x": {"field": "date", "type": "nominal"}` on dates, or
+`"y": {"field": "label", "type": "quantitative"}` on text.
+
 **Fix:** pick `type` from the data: `temporal` for dates, `ordinal` when order matters, `nominal`
 for categories and `quantitative` for measures.
 
