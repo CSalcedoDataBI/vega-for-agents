@@ -15,6 +15,10 @@ there), so they come from the Vega 6 source files pinned in scripts/vega_sources
 exports/vega-v6.expressions.catalog.json, exports/vega-v6.event-streams.catalog.json, and the
 reference cards under reference/vega/, rendered from those two catalogues.
 
+The adopted authoring traps are not a name vocabulary either: they are authored reference content,
+so they come from scripts/adopted_traps.py and are written to exports/adopted-traps.catalog.json
+with a stable id per trap.
+
 Every catalogue carries `meta.contract`, the semver of the catalogue format (CONTRACT_VERSION).
 After writing the catalogues the script writes exports/manifest.json, one entry per exported file
 with its SHA-256, so consumers can copy the directory at a release tag and verify it.
@@ -36,6 +40,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import adopted_traps  # noqa: E402
 import vega_cards  # noqa: E402
 import vega_language  # noqa: E402
 import vega_sources  # noqa: E402
@@ -61,6 +66,11 @@ SOURCE_CATALOGS = {
     "vega-expressions": "vega-v6.expressions.catalog.json",
     "vega-event-streams": "vega-v6.event-streams.catalog.json",
 }
+
+# The authored trap catalogue: generated like the others, but not extracted from a schema or the
+# Vega source. Each trap has a stable id, a symptom, a cause and a fix.
+ADOPTED_TRAPS = "adopted-traps"
+ADOPTED_TRAPS_CATALOG = "adopted-traps.catalog.json"
 
 # The four structural catalogues. The v5 keys are the original ones: `vega-lite` and `vega` still
 # mean the v5 schema, so existing callers keep working. v6 is the default target.
@@ -284,12 +294,15 @@ def build_all() -> dict[str, dict]:
         catalogs[language] = build_catalog(language, marktypes[cfg["version"]])
     catalogs["vega-expressions"] = with_contract(vega_language.expressions_catalog())
     catalogs["vega-event-streams"] = with_contract(vega_language.event_streams_catalog())
+    catalogs[ADOPTED_TRAPS] = with_contract(adopted_traps.traps_catalog())
     return catalogs
 
 
 def catalog_path(language: str) -> Path:
     if language in SOURCE_CATALOGS:
         return EXPORTS / SOURCE_CATALOGS[language]
+    if language == ADOPTED_TRAPS:
+        return EXPORTS / ADOPTED_TRAPS_CATALOG
     return EXPORTS / SCHEMAS[language]["catalog"]
 
 
@@ -470,12 +483,54 @@ def write_all(catalogs: dict[str, dict]) -> None:
         path.write_bytes(text.encode("utf-8"))
 
 
+def check_trap_catalog(catalog: dict) -> list[str]:
+    """The trap catalogue is authored, so check its invariants: stable, unique, complete ids."""
+    errors: list[str] = []
+    traps = catalog.get("traps")
+    if not isinstance(traps, list) or not traps:
+        return [f"{ADOPTED_TRAPS_CATALOG}: `traps` must be a non-empty list"]
+    seen: set[str] = set()
+    for index, trap in enumerate(traps):
+        where = f"{ADOPTED_TRAPS_CATALOG}: trap #{index + 1}"
+        if not isinstance(trap, dict):
+            errors.append(f"{where}: not an object")
+            continue
+        trap_id = trap.get("id")
+        if not isinstance(trap_id, str) or not trap_id:
+            errors.append(f"{where}: missing `id`")
+        elif trap_id in seen:
+            errors.append(f"{where}: duplicate id {trap_id!r}")
+        else:
+            seen.add(trap_id)
+        for key in ("language", "title", "symptom", "cause", "fix", "status", "reason"):
+            if not isinstance(trap.get(key), str) or not trap[key].strip():
+                errors.append(f"{where}: missing `{key}`")
+        if trap.get("language") not in ("vega", "vega-lite"):
+            errors.append(f"{where}: `language` must be 'vega' or 'vega-lite'")
+        if trap.get("status") not in ("adopted", "merged", "rejected"):
+            errors.append(f"{where}: `status` must be adopted, merged or rejected")
+        if trap.get("status") == "merged" and not trap.get("mergedInto"):
+            errors.append(f"{where}: a merged trap must name `mergedInto`")
+        if trap.get("status") == "adopted" and not trap.get("card"):
+            errors.append(f"{where}: an adopted trap must name its `card`")
+    return errors
+
+
 def check_all(catalogs: dict[str, dict]) -> list[str]:
     errors = list(vega_sources.verify())
+    trap_catalog = catalogs.get(ADOPTED_TRAPS)
+    if trap_catalog is None:
+        errors.append(f"{ADOPTED_TRAPS_CATALOG}: catalogue missing; run scripts/extract_catalog.py")
+    else:
+        errors += check_trap_catalog(trap_catalog)
     for language, catalog in catalogs.items():
         path = catalog_path(language)
-        source = (SCHEMAS[language]["schema"] if language in SCHEMAS
-                  else f"the pinned Vega {vega_sources.VERSION} source")
+        if language in SCHEMAS:
+            source = SCHEMAS[language]["schema"]
+        elif language == ADOPTED_TRAPS:
+            source = "scripts/adopted_traps.py"
+        else:
+            source = f"the pinned Vega {vega_sources.VERSION} source"
         meta = catalog.get("meta")
         if not isinstance(meta, dict) or "contract" not in meta:
             errors.append(f"{path.name}: meta.contract is missing from the generated catalogue; "

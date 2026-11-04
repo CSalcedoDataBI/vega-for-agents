@@ -4,6 +4,14 @@
     {
       "contract": "1.0.0",
       "kind": "catalog",
+      "language": "vega-vega-lite",
+      "path": "exports/adopted-traps.catalog.json",
+      "sha256": "686faf4376d2d2e4ee361943072806de1741aa3a8fefaaf7b0446b2d9e1872cb",
+      "version": "v6"
+    },
+    {
+      "contract": "1.0.0",
+      "kind": "catalog",
       "language": "vega-lite",
       "path": "exports/vega-lite-v5.catalog.json",
       "sha256": "2a61e2124f8de206a2152ef0c05e0c5b1c6776b33e7f878f725e4f3a1df312d9",
