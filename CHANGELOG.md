@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0](https://github.com/CSalcedoDataBI/vega-for-agents/compare/v0.1.0...v0.2.0) (2026-11-04)
+
+
+### Features
+
+* **exports:** adopt the 11 Vega / Vega-Lite traps ([#20](https://github.com/CSalcedoDataBI/vega-for-agents/issues/20)) ([7b9c063](https://github.com/CSalcedoDataBI/vega-for-agents/commit/7b9c063ceaf97722f40290f067f4d0dd1f02e4d8))
+* **exports:** adopt the 11 Vega / Vega-Lite traps ([#20](https://github.com/CSalcedoDataBI/vega-for-agents/issues/20)) ([3370a90](https://github.com/CSalcedoDataBI/vega-for-agents/commit/3370a90d7792765f6364d52f523296450e3688a1))
+
+
+### Bug Fixes
+
+* **drafts:** correct the signal and bounds-flush traps against Vega 6.4.0 ([2c5fda5](https://github.com/CSalcedoDataBI/vega-for-agents/commit/2c5fda50cf0916be9fc91637559f126c5ee06e4d))
+* **exports:** correct three trap claims against Vega 6.4.0 and Vega-Lite 6.4.3 ([68a6002](https://github.com/CSalcedoDataBI/vega-for-agents/commit/68a6002ec4150a02ff22fcda36c5b5efd0922116))
+* **release:** drop release-as now that v0.1.0 exists ([#18](https://github.com/CSalcedoDataBI/vega-for-agents/issues/18)) ([2620473](https://github.com/CSalcedoDataBI/vega-for-agents/commit/2620473191df1662330e60376bb81ff8e02c37d5))
+
 ## 0.1.0 (2026-11-02)
 
 

@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "vega-for-agents",
   "displayName": "Vega for agents",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The Vega and Vega-Lite language reference for AI agents: marks, encoding channels, transforms, scales, projections and properties extracted from the official JSON Schemas, plus a sanitized path for reporting a wrong or missing name. Not Power BI or Deneb authoring.",
   "author": {
     "name": "Cristóbal Salcedo",
